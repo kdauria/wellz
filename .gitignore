@@ -9,3 +9,5 @@ PotAssay.Rproj
 .~lock.MasterSheet.csv#
 
 Tests/LoadingData/.~lock.MultipleCompoundSolution.csv#
+
+.Rhistory
