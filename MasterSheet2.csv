@@ -1,0 +1,257 @@
+FILES											
+											
+ACTIONS											
+file	wells	ID	t1	t2	rmVol	adVol	name	conc	type	solvent	notes
+CHO.txt	A-H1-2	start	0	1	0	100	-	-	-	media	
+	A-H1-2	cellSeed	2	3	0	100	CHO	9000	total		
+	A-H1-2	move1	285	286	0	0	-	-	-		
+	A-H1-2	mediaReplace	307	308	100	100	-	-	-		
+	B1, F2	toxinAdd	611	612	0	22.2	-	-	-		
+	A1, C-H1						TcdA	1000, 100, 1, 0.1, 0.01, 0.001, 0.0001	final		
+	A-E2, G-H2						TcdB				
+HCT8.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-C3, A-B4	cellSeed	2	3	0	100	HCT8	30000, 15000, 20000, 20000, 10000	total		
+	D-H3, C-H4							5000			
+	A3-4	toxinAdd	287	288	0	22.2	TcdA	100	final		
+	C3						TcdB	100	final		
+	B3, D-H3, B-H4	move1				0	-	-	-		
+	A-H3-4	mediaReplace	722	723	100	100	-	-	-		
+	D-H3	toxinAdd	731	732	0	22.2	TcdA	500, 100, 10, 1, 0.1	final		
+	C4						-	-	-		
+	D-H4						TcdB	500, 100, 10, 1, 0.1	final		
+	A-C3, A-B4	move2				0	-	-	-		
+	A-H3-4	mediaReplace2	1231	1232	100	100	-	-	-		
+HCT8-2a.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	HCT8	60000	total		
+	A1	toxinAdd	331	332	0	22.2	TcdB	1	final		
+							gdTcdB	100	final		
+	B1						TcdB	1	final		
+							gdTcdB	10	final		
+	C1						TcdA	100	final		
+							gdTcdB	1000	final		
+	D1						TcdB	1	final		
+	E1						TcdA	100	final		
+	F-G1						gdTcdB	1000, 100	final		
+	H1						-	-	-		
+	A2		342	343	0	22.2	TcdB	1	final		
+							gdTcdB	100	final		
+	B2						TcdB	1	final		
+							gdTcdB	10	final		
+	C2						TcdA	100	final		
+							gdTcdB	1000	final		
+	D2						TcdB	1	final		
+	E2						TcdA	100	final		
+	F-G2						gdTcdB	1000, 100	final		
+	H2						-	-	-		
+HCT8-2b.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	cellSeed	2	3	0	100	HCT8	60000	total		
+	A3	toxinAdd	355	356	0	22.2	TcdB	1	final		
+							gdTcdB	100	final		
+	B3						TcdB	1	final		
+							gdTcdB	10	final		
+	C3						TcdA	100	final		
+							gdTcdB	1000	final		
+	D3						TcdB	1	final		
+	E3						TcdA	100	final		
+	F-G3						gdTcdB	1000, 100	final		
+	H3						-	-	-		
+	A4		369	370	0	22.2	TcdB	1	final		
+							gdTcdB	100	final		
+	B4						TcdB	1	final		
+							gdTcdB	10	final		
+	C4						TcdA	100	final		
+							gdTcdB	1000	final		
+	D4						TcdB	1	final		
+	E4						TcdA	100	final		
+	F-G4						gdTcdB	1000, 100	final		
+	H4						-	-	-		
+HCT8-3.txt	A-H3-6	start	0	1	0	100	-	-	-		
+	A-H3-6	cellSeed	3	4	0	100	HCT8	45000	total		
+	A3, D4, B5	toxinAdd	2166, 2173, 2180	2167, 2174, 2181	0	22.2	TcdA	100	final		
+							gdTcdB	1000			
+	B3, C4, D5						gdTcdB	100			
+	C3, B4, A5						TcdA	100			
+	D3, A4, C5						-	-	-		
+	E3, H4, F5						TcdB	1	final		
+	F3, G4, H5						TcdB	1			
+							gdTcdB	100			
+	G3, F4, E5						TcdB	1			
+							gdTcdB	10			
+	H3, E4, G5						gdTcdB	1000			
+	A6, C6, E6		2187	2188			gdTcdB	10			
+	B6, D6						TcdAup	100			
+	F6, G6						TcdAother	100			
+	H6						-	-	-		
+HCT8-4.txt	A-H1-3, A-D4, F-H4	start	0	1	0	100	-	-	-		
+	A-H1-3, A-D4, F-H4	cellSeed	2	3	0	100	HCT8	55000	total		
+	A1	toxinAdd	2544	2545	0	22.2	TcdA	10	final		
+	B1-2		2544, 2547	2545, 2548			TcdA	1000	final		
+	C1-2						-	-	-		
+	D1-2						gdTcdB	1000	final		
+	E1, F2						gdTcdB	100			
+	F-G1		2544	2545			TcdB	10			
+							gdTcdB	100			
+	H1, G3		2544, 2554	2545, 2555			TcdB	10			
+							gdTcdB	1000			
+	A2, B4		2547, 2558	2548, 2559			TcdB	10			
+	E2, G2		2547	2548			TcdA	100			
+	H2, B3		2547, 2554	2548, 2555			TcdB	100			
+	A3-4		2554, 2558	2555, 2559			TcdB	100			
+							gdTcdB	1000			
+	C3, F3		2554	2555			TcdA	10			
+							gdTcdB	100			
+	D3, H3						TcdA	100			
+							gdTcdB	100			
+	E3, D4		2554, 2558	2555, 2559			TcdA	1000			
+							gdTcdB	1000			
+	C4, H4		2558	2559			TcdB	100			
+							gdTcdB	100			
+	F-G4		2554	2555			TcdA	100			
+							gdTcdB	1000			
+HUVEC-a.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	start	2	3	0	100	HUVEC	5000	total		
+	A-H3-4	replaceMedia	1794	1795	100	100	-	-	-		
+	D3-4	toxinAdd	1910	1911	0	22.2	-	-	-		
+	A-C3, E-H3						TcdA	1000, 300, 100, 30, 10, 1, 0.1	final		
+	A-C4, E-H4						TcdB	1000, 300, 100, 30, 10, 1, 0.1	final		
+HUVEC-b.txt	A-H5-6	start	0	1	0	100	-	-	-		
+	A-H5-6	cellSeed	2	3	0	100	HUVEC	5000	total		
+	A-H5-6	replaceMedia	1794	1795	100	100	-	-	-		
+	D5-6	toxinAdd	1913	1914	0	22.2	-	-	-		
+	A-C5, E-H5						TcdA	1000, 300, 100, 30, 10, 1, 0.1	final		
+	A-C6, E-H6						TcdB	1000, 300, 100, 30, 10, 1, 0.1	final		
+T84-a.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	cellSeed	2	3	0	100	T84	30000	total		
+	B-F3, B-C4	toxinAdd	529	530	0	22.2	TcdA	300, 100, 30, 10, 3, 1, 0.1	final		
+	E4						-	-	-		
+	A3-4, D4, F4, G-H3-4	nothingDone			0	0	-	-	-		
+T84-b.txt	A-H5-6	start	0	1	0	100	-	-	-		
+	A-H5-6	cellSeed	2	3	0	100	T84	30000	total		
+	B-F6, C5, E-F5	toxinAdd	1429	1430	0	22.2	TcdB	1000, 300, 100, 30, 10, 3, 1, 0.1	final		
+	D5						-	-	-		
+	A5-6, B5, G-H5-6	nothingDone			0	0	-	-	-		
+IMCE.txt	A-H3-6	start	0	1	0	100	-	-	-		
+	A-H3-6	cellSeed	2	3	0	100	IMCE	30000	total		
+	A-B3, D-H3	toxinAdd	449	450	0	22.2	TcdA	1000, 100, 10, 1, 0.1, 0.01, 0.001	final		
+	C3						-	-	-		
+	A-H4		478	489			TcdB	100, 10, 1, 0.1, 0.01, 0.001, 0.0001, 0.00001	final		
+	A-B5, D-H5		456	457			TcdA	1000, 100, 10, 1, 0.1, 0.01, 0.001			
+	C5						-	-	-		
+	A-G6		485	486			TcdB	10, 1, 0.1, 0.01, 0.001, 0.0001, 0.00001	final		
+	H6						-	-	-		
+J774-a.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	J774	50000	total		
+	A-B1, D-H1	toxinAdd	101	102	0	22.2	TcdA	1000, 300, 100, 10, 3, 1, 0.1	final		
+	A-B2, D-H2						TcdB				
+	C1-2						-	-	-		
+J774-b.txt	A-H5-6	start	0	1	0	100	-	-	-		
+	A-H5-6	cellSeed	2	3	0	100	J774	50000	total		
+	A-B5, D-H5	toxinAdd	493	494	0	22.2	TcdA	1000, 300, 100, 10, 3, 1, 0.1	final		
+	A-B6, D-H6						TcdB				
+	C5						-	-	-		
+	C6						Other	100	final		
+J774-2.txt	A-H5-6	start	0	1	0	100	-	-	-		
+	A-H5-6	cellSeed	2	3	0	100	J774	50000	total		
+	A-G5	toxinAdd	118	119	0	22.2	TcdB	10, 1, 0.1, 0.01, 0.001, 0.0001, 0.00001	final		
+	A-G6		136	137			TcdB	10, 1, 0.1, 0.01, 0.001, 0.0001, 0.00001			
+	H5-6		118, 136	119, 137			-	-	-		
+J774-3a.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	J774	50000	total		
+	A1-2	toxinAdd	118, 124	119, 125		22.2	TcdB	0.01	final		
+							gdTcdB	1			
+	B1-2						TcdB	0.01			
+							gdTcdB	0.1			
+	C1-2						TcdA	10			
+							gdTcdB	100			
+	D1-2						TcdB	0.01			
+	E1-2						TcdA	10			
+	F1-2						gdTcdB	100			
+	G1-2						gdTcdB	1			
+	H1		118	119			gdTcdB	0.1			
+	H2		124	125			-	-	-		
+J774-3b.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	cellSeed	2	3	0	100	J774	50000	total		
+	A3-4	toxinAdd	132, 138	133, 139		22.2	TcdB	0.01	final		
+							gdTcdB	1			
+	B3-4						TcdB	0.01			
+							gdTcdB	0.1			
+	C3-4						TcdA	10			
+							gdTcdB	100			
+	D3-4						TcdB	0.01			
+	E3-4						TcdA	10			
+	F3		132	133			gdTcdB	100			
+	F4		138	139			-	-	-		
+	G3		132	133			-	-	-		
+	G4		138	139			gdTcdB	1	final		
+	H3-4		132, 138	133, 139			gdTcdB	0.1			
+J774-4.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	J774	50000	total		
+	A-B1	toxinAdd	1725	1726	0	22.2	TcdB	1, 100	final		
+	C1						-	-	-		
+	D-E1						gdTcdB	1, 100	final		
+	F-G1						TcdA	3, 300			
+	H1						gdTcdB	100			
+							TcdA	10			
+	A-B2		1732	1733	0	22.2	TcdB	1, 100	final		
+	C2						-	-	-		
+	D-E2						gdTcdB	1, 100	final		
+	F-G2						TcdA	3, 300			
+	H2						gdTcdB	100			
+							TcdA	10			
+J774-5.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	J774	50000	total		
+	A1-2	toxinAdd	1427, 1431	1428, 1432	0	22.2	gdTcdB	100	final		
+							TcdB	10			
+	B1-2						gdTcdB	10			
+							TcdA	1			
+	C1-2						gdTcdB	100			
+							TcdA	1000			
+	D1-2						TcdA	1			
+	E1-2						TcdA	1000			
+	F1-2						gdTcdB	10			
+	G1-2						gdTcdB	100			
+	H1-2						-	-	-		
+PMN-a.txt	A-H1-2	start	0	1	0	100	-	-	-		
+	A-H1-2	cellSeed	2	3	0	100	PMN	360000	total		
+							IL8	222.22	start		
+	A-C1, E-H2	toxinAdd	28	29	0	22.2	TcdA	10000, 7000, 5000, 3000, 1000, 500, 100	final		
+	A-C2, E-H1						TcdB	10000, 7000, 5000, 3000, 1000, 500, 100			
+	D1-2						-	-	-		
+PMN-b.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	cellSeed	2	3	0	100	PMN	360000	total		
+							IL8	222.22	start		
+	A-C3, E-H4	toxinAdd	28	29	0	22.2	TcdA	10000, 7000, 5000, 3000, 1000, 500, 100	final		
+	A-C4, E-H3						TcdB	10000, 7000, 5000, 3000, 1000, 500, 100			
+	D3-4						-	-	-		
+PMN-2a.txt	A-H3-4	start	0	1	0	100	-	-	-		
+	A-H3-4	cellSeed	2	3	0	100	PMN	360000	total		
+	A-E3, G-H3	toxinAdd	29	30	0	22.2	TcdA	1000, 100, 10, 1, 0.1, 0.01, 0.001	final		
+	A-G4						TcdB				
+	F3						-	-	-		
+	H4	pmaAdd					PMA	12345	final		
+PMN-2b.txt	A-H5-6	start	0	1	0	100	-	-	-		
+	A-H5-6	cellSeed	2	3	0	100	PMN	360000	total		
+	A-E5, G-H5	toxinAdd	29	30	0	22.2	TcdA	1000, 100, 10, 1, 0.1, 0.01, 0.001	final		
+	A-G6						TcdB				
+	F5, H6						-	-	-		
+PMN-3.txt	A-H3-4	start	0	1	0	50	IL8	1387.3	start		
+	A-H5-6						-	-	-		
+	A-H3-6	cellSeed	2	3	0	175	PMN	350000	total		
+	A3-6	toxinAdd	372, 384, 443, 447	373, 385, 444, 448	0	25	TcdB	1	final		
+	B3-6						TcdB	10	final		
+	D3-6						TcdB	100	final		
+	E3-6						TcdB	1000	final		
+	F3-6						TcdA	1000	final		
+	G3-6						TcdA	100	final		
+	H3-6						TcdA	10	final		
+	C3-6						-	-	-		
+PMN-4.txt	A-G1-2	start	0	1	0	50	IL8	1387.3	start		
+	A-G3-4						-	-	-		
+	A-G1-4	cellSeed	2	3	0	175	PMN	350000	total		
+	A1-4	toxinAdd	648, 651, 658, 661	649, 652, 659, 662		25	TcdA	10	final		
+	B1-4						TcdA	100	final		
+	D1-4						TcdA	1000	final		
+	E1-4						TcdB	1000	final		
+	F1-4						TcdB	100	final		
+	G1-4						TcdB	10	final		
+	C1-4						-	-	-		
