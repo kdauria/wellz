@@ -37,7 +37,50 @@ parse.metadata.file = function( fpath ) {
   return(list(actions=actions.metadata,files=file.metadata))
 }
 
+# separate csv file into data.frames describing actions and files
+csv.to.metadata = function( filepath ) {
+  
+  metadata = read.csv(filepath ,header=FALSE, as.is=TRUE)
+  if( ncol(metadata)==1 ) {
+    metadata = read.csv(filepath ,header=FALSE, as.is=TRUE, sep="\t")
+  }
+  
+  # separate the FILES section from the ACTIONS section
+  borders = which( metadata[,1] %in% c("FILES","ACTIONS") )
+  sections = list( metadata[ (borders[1]+1):(borders[2]-1),  ],
+                   metadata[ (borders[2]+1):nrow(metadata),]     )
+  sections = lapply(sections, rm.empty.rows.columns )
+  sections = lapply(sections, row.as.header)
+  
+  return( list( file.metadata = sections[[1]], 
+                actions.metadata = sections[[2]] ) )
+}
 
+# Fill in the empty columns of an "action" row, given a actions metadata data.frame
+fill.in.actions = function( x ) {
+  
+  # If a row doesn't have "Well" defined, then it's describing the solution
+  # of the action row above it. Action row = arow. Solution row = srow.
+  arows = which( !is.bs(x$wells) )
+  srows = which( is.bs(x$wells) )
+  
+  # fill in the action rows
+  for( i in setdiff(seq_along(arows),1) ) { 
+    rownum = arows[i]
+    past.rownum = arows[i-1]
+    empty.columns = which( x[ rownum, ] == "" )
+    x[rownum, empty.columns] = x[past.rownum, empty.columns]
+  }
+  
+  # fill in the rows describing solutions
+  for( rownum in srows ) { 
+    fillvars = c("file","name","conc","type","solvent")
+    empty.columns = subset(fillvars, is.bs(x[rownum,fillvars]) )  
+    x[rownum, empty.columns] = x[rownum-1, empty.columns]
+  }
+  
+  return(x)
+}
 
 
 # return a list describing which rows correspond to each action and vice versa

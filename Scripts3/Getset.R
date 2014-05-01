@@ -19,3 +19,24 @@ search.well = function(well,filename=NULL,code=NULL) {
   
   yn
 }
+
+`[.well` = function( x, i=NULL, j=NULL ) {
+  class(x) = "data.frame"
+  if( !is.null(i) & is.null(j) ) {
+    y = x[i,]
+    class(y) = c("well","data.frame")
+  } else if( is.null(i) & !is.null(j) ) {
+    y = x[,j]
+  } else {   
+    y = x[i,j]
+    if( (is.numeric(j) && length(j)==ncol(x)) ||
+          (is.logical(j) && sum(j)==ncol(x)) ) {
+      class(y) = c("well","data.frame")
+    }
+  }
+  y
+}
+
+c.well = function(...) {
+  rbind(...)
+}

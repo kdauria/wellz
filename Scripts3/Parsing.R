@@ -48,9 +48,11 @@ meta.df = fillblanks_metadata(meta.df)
 meta.df = colclasses_metadata(meta.df)
 
 
+
+
+###### Create well objects #####
 action.rows = split(meta.df,paste(meta.df$wells,meta.df$ID))
 
-### Create well objects
 # Expand a well shorthand to a vector of wells
 well.codes = vapply(action.rows,function(x) x$wells[1], "")
 well.codes = lapply(well.codes,expand_code)
@@ -64,42 +66,58 @@ wells = data.frame(file=files, code=codes, actions=NA)
 class(wells) = c("well", "data.frame")
 rownames(wells) = NULL
 
-### Create action objects from the rows
+###### Create action objects from the rows ######
 row_to_action = function( x ) {
   # Make a solution object
   solution = list()
   solution$solvent = data.frame(name=x$solvent[1],perc=100)
   solution$compounds = na.omit( x[,c("name","conc","type")] )
   solution$volume = x$adVol[1]
-  class(solution) = "Solution"
+  class(solution) = c("Solution","list")
   
   # Make the action object
-  action = list()
-  action$solution = solution
-  action$ID = x$ID[1]
-  action$rmVol = x$rmVol[1]
-  class(action) = "Action"
+  action = data.frame(ID=x$ID[1], i=x$i[1], rmVol=x$rmVol[1], solution=I(list(solution)) )
+  class(action) = c("Action","data.frame")
   action
 }
 actions = lapply(action.rows,row_to_action)
+actions = do.call(rbind,actions)
+rownames(actions) = NULL
 
-### Add the action objects to the well objects
+###### Group the actions by wells ######
 files = vapply(action.rows,function(x) x$file[1], "")
-for( i in 1:length(files) ) {
-  codes = well.codes[[i]]
-  select(wells,files[i],codes)$actions = actions[i]
+well.codes2 = mapply(paste,files,well.codes)
+names(well.codes2) = 1:length(well.codes2)
+well.action.idxs = invert_list(well.codes2)[paste(wells$file,wells$code)]
+action.lists = lapply(well.action.idxs, function(x) actions[x,] )
+
+
+
+
+
+wells
+
+
+
+
+
+rownames(actions) = NULL
+#actions = actions[ order(actions$i), ]
+
+
+
+
+names(well.codes) = 1:length(well.codes)
+well.action.idxs = invert_list( well.codes )
+
+lapply(well.action.idxs, function(x) actions[x,])
+
+
+invert_list = function(x) {
+  split( rep(names(x),times=sapply(x,length)),
+         unlist(x) )
 }
 
-select(wells,files[i],codes)
-search(wells,files[i],codes)
-
-
-
-
-
-wells$actions[[1]] = actions[[1]]
-
-select(wells,file=files[1])$actions
 
 
 
@@ -109,13 +127,16 @@ select(wells,file=files[1])$actions
 
 
 
-action = as.list(rows[1,action.cols])
-action$solution = soln
-class(action) = "RTCAaction"
 
 
 
 
 
-out = as.list(x[1,c("")])
+
+
+
+
+
+
+
 
