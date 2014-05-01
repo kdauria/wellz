@@ -4,6 +4,9 @@
 
 # Parse the metadata file and data files into a single wellList object
 # Wrapper for several smaller parsing functions
+library(Rcpp)
+source("./Scripts2/general.R")
+metadata = "./MasterSheet2.csv"
 parse.RTCAanalyze = function( metadata, data.dir ) {
   
   # parse the metadata text files

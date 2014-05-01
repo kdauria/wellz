@@ -1,23 +1,8 @@
-# Steps to parsing an annotation file
-# 1. Read the data into R
-# 2. Fill in empty cells with value from above column
-
-# 3. Identify action rows
-# 4. Convert rows to action objects
-
-# 5. Identify all wells
-# 6. Make all well objects
-
-# 7. Assign the actions to actionLists in appropriate well objects
-# 8. Sort the actionLists by index for each well
-
-# DONE
-
-
 library(zoo)
 library(stringr)
 source("./Scripts3/Parsing_expand.R")
 source("./Scripts3/Getset.R")
+source("./Scripts3/General.R")
 
 metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
 metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
@@ -37,36 +22,37 @@ fillblanks_metadata = function(x) {
   x
 }
 
-# 3. Set some columns to be numeric
+# 3. Expand comma-separated shorthand
+expand_action = function( df ) {
+  codes = expand_code( df$wells )
+  nc = nrow(df) # number of compounds
+  nw = length(codes) # number of wells
+  newdf = df[rep(1:nc,nw),]
+  newdf$wells = rep(codes,each=nc)
+  
+  for( i in 1:nc) {
+    row = as.character(newdf[i,])
+    comma.cols = grepl(",",row)
+    
+    if(any(comma.cols)) {
+      split.df = matrix( comma_split(row[comma.cols]) , nrow=nw )
+      newdf[ 0:(nw-1)*nc+i, comma.cols ] = split.df
+    }
+  }
+  newdf
+}
+expand_actions = function(meta.df) {
+  action.rows = split(meta.df,paste(meta.df$wells,meta.df$ID))
+  do.call( rbind, lapply(action.rows,expand_action) )
+}
+
+# 4. Set some columns to be numeric
 colclasses_metadata = function(meta.df, numeric.cols=c("i","rmVol","adVol","conc") ) {
   meta.df[,numeric.cols] = apply(meta.df[,numeric.cols],2,as.numeric)
   meta.df
 }
 
-meta.df = read_metadata(metadata,data.dir)
-meta.df = fillblanks_metadata(meta.df)
-meta.df = colclasses_metadata(meta.df)
-
-
-
-
-###### Create well objects #####
-action.rows = split(meta.df,paste(meta.df$wells,meta.df$ID))
-
-# Expand a well shorthand to a vector of wells
-well.codes = vapply(action.rows,function(x) x$wells[1], "")
-well.codes = lapply(well.codes,expand_code)
-
-# Make a "roster" of wells, with its code and file as it's "name"
-files = vapply(action.rows,function(x) x$file[1], "")
-wells.in.file = lapply( split(well.codes,files), function(x) unique(unlist(x)))
-files = rep(names(wells.in.file),time=sapply(wells.in.file,length))
-codes = unlist(wells.in.file)
-wells = data.frame(file=files, code=codes, actions=NA)
-class(wells) = c("well", "data.frame")
-rownames(wells) = NULL
-
-###### Create action objects from the rows ######
+# 5. Create a list of actions for each well
 row_to_action = function( x ) {
   # Make a solution object
   solution = list()
@@ -76,59 +62,30 @@ row_to_action = function( x ) {
   class(solution) = c("Solution","list")
   
   # Make the action object
-  action = data.frame(ID=x$ID[1], i=x$i[1], rmVol=x$rmVol[1], solution=I(list(solution)) )
+  action = data.frame(file=x$file[1], code=x$wells[1],
+                      ID=x$ID[1], i=x$i[1], 
+                      rmVol=x$rmVol[1], solution=I(list(solution)) )
   class(action) = c("Action","data.frame")
   action
 }
-actions = lapply(action.rows,row_to_action)
-actions = do.call(rbind,actions)
-rownames(actions) = NULL
-
-###### Group the actions by wells ######
-files = vapply(action.rows,function(x) x$file[1], "")
-well.codes2 = mapply(paste,files,well.codes)
-names(well.codes2) = 1:length(well.codes2)
-well.action.idxs = invert_list(well.codes2)[paste(wells$file,wells$code)]
-action.lists = lapply(well.action.idxs, function(x) actions[x,] )
-
-
-
-
-
-wells
-
-
-
-
-
-rownames(actions) = NULL
-#actions = actions[ order(actions$i), ]
-
-
-
-
-names(well.codes) = 1:length(well.codes)
-well.action.idxs = invert_list( well.codes )
-
-lapply(well.action.idxs, function(x) actions[x,])
-
-
-invert_list = function(x) {
-  split( rep(names(x),times=sapply(x,length)),
-         unlist(x) )
+rows_to_actions = function( meta.df ) {
+  action.rows = split(meta.df,paste(meta.df$file,meta.df$wells,meta.df$ID))
+  all.actions = do.call(rbind, lapply(action.rows,row_to_action))
+  all.actions = all.actions[order(all.actions$i,all.actions$file,all.actions$code),]
+  split(all.actions[,c("ID","i","rmVol","solution")], 
+        paste(all.actions$file,all.actions$code))
 }
 
+meta.df = read_metadata(metadata,data.dir)
+meta.df = fillblanks_metadata(meta.df)
+meta.df = expand_actions(meta.df)
+meta.df = colclasses_metadata(meta.df)
 
+well.actions = rows_to_actions(meta.df)
+class(well.actions[[1]])
 
-
-
-
-
-
-
-
-
-
+# 6. Create wells object from the actions
+wells = do.call(rbind, str_split( names(well.actions), " ") )
 
 
 

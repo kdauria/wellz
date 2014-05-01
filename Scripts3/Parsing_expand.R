@@ -28,8 +28,8 @@ expand_code = function(code) {
   number.parts = str_extract(codes,"[0-9]+-*[0-9]*")
   code.nums = lapply(number.parts,expand_numbers)
   
-  unlist( mapply(function(x,y) outer(x,y,FUN=paste0), 
-                 code.lets, code.nums) )
+  c(unlist( mapply(function(x,y) outer(x,y,FUN=paste0), 
+                 code.lets, code.nums) ))
 }
 
 
