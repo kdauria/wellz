@@ -22,6 +22,21 @@ search.well = function(well,filename=NULL,code=NULL) {
   yn
 }
 
+####### access and set different elements of wells and wellLists
+code = function(x) UseMethod("code",x)
+code.well = function(x) x[["code"]]
+code.wellList = function(x) vapply(x,"[[","","code")
+"code<-" = function(x,value) UseMethod("code<-",x)
+"code<-.well" = function(x,value) x[["code"]] = value
+"code<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["code"]] = value[i]; x }
+
+filename = function(x) UseMethod("filename",x)
+filename.well = function(x) x[["file"]]
+filename.wellList = function(x) vapply(x,"[[","","file")
+"filename<-" = function(x,value) UseMethod("filename<-",x)
+"filename<-.well" = function(x,value) x[["file"]] = value
+"filename<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["file"]] = value[i]; x }
+
 
 ####### Custom selector functions
 custom.df.selector = function(x, i=NULL, j=NULL, class) {

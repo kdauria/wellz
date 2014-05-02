@@ -62,11 +62,10 @@ row_to_action = function( x ) {
   class(solution) = c("Solution","list")
   
   # Make the action object
-  action = data.frame(file=x$file[1], code=x$wells[1],
-                      ID=x$ID[1], i=x$i[1], 
-                      rmVol=x$rmVol[1], solution=I(list(solution)) )
-  class(action) = c("Action","data.frame")
-  action
+  data.frame(file=x$file[1], code=x$wells[1],
+              ID=x$ID[1], i=x$i[1], 
+              rmVol=x$rmVol[1], solution=I(list(solution)) )
+
 }
 rows_to_actions = function( meta.df ) {
   action.rows = split(meta.df,paste(meta.df$file,meta.df$wells,meta.df$ID))
@@ -76,16 +75,40 @@ rows_to_actions = function( meta.df ) {
         paste(all.actions$file,all.actions$code))
 }
 
+# 6. Create wells object from the actions
+make_wells = function(meta.df) {
+  # Create empty well objects and the wellList
+  template.well = list(file=NA,code=NA,actions=NA)
+  class(template.well) = c("well","list")
+  wells = rep(list(template.well),length(well.actions))
+  class(wells) = c("wellList","list")
+  
+  # Fill in the file names and codes
+  wells.df = do.call(rbind, str_split( names(well.actions), " ") )
+  files = 
+  code(wells) = wells.df[,2]
+  filename(wells) = wells.df[,1]
+  wells
+}
+
 meta.df = read_metadata(metadata,data.dir)
 meta.df = fillblanks_metadata(meta.df)
 meta.df = expand_actions(meta.df)
 meta.df = colclasses_metadata(meta.df)
 
 well.actions = rows_to_actions(meta.df)
-class(well.actions[[1]])
+wells = make_wells(meta.df)
 
-# 6. Create wells object from the actions
-wells = do.call(rbind, str_split( names(well.actions), " ") )
+# Convert the well.actions to lists
+
+
+
+
+
+
+
+
+
 
 
 
