@@ -64,19 +64,20 @@ row_to_action = function( x ) {
   # Make the action object
   data.frame(file=x$file[1], code=x$wells[1],
               ID=x$ID[1], i=x$i[1], 
-              rmVol=x$rmVol[1], solution=I(list(solution)) )
+              rmVol=x$rmVol[1], solution=I(list(solution)),
+              stringsAsFactors=FALSE)
 
 }
 rows_to_actions = function( meta.df ) {
   action.rows = split(meta.df,paste(meta.df$file,meta.df$wells,meta.df$ID))
-  all.actions = do.call(rbind, lapply(action.rows,row_to_action))
+  all.actions = do.call(rbind, lapply(action.rows,row_to_action) )
   all.actions = all.actions[order(all.actions$i,all.actions$file,all.actions$code),]
   split(all.actions[,c("ID","i","rmVol","solution")], 
         paste(all.actions$file,all.actions$code))
 }
 
 # 6. Create wells object from the actions
-make_wells = function(meta.df) {
+make_wells = function(meta.df, well.actions) {
   # Create empty well objects and the wellList
   template.well = list(file=NA,code=NA,actions=NA)
   class(template.well) = c("well","list")
@@ -91,18 +92,28 @@ make_wells = function(meta.df) {
   wells
 }
 
+# 7. Convert the well.actions to lists
+action.as.list = function(x) {
+  x = as.list(x)
+  class(x) = c("action","list")
+  x
+}
+action.df.as.list = function(x) {
+  action.list = apply( x, 1, action.as.list )
+  class(action.list) = c("actionList","list")
+  names(action.list) = ID(action.list)
+  action.list
+}
+
+
 meta.df = read_metadata(metadata,data.dir)
 meta.df = fillblanks_metadata(meta.df)
 meta.df = expand_actions(meta.df)
 meta.df = colclasses_metadata(meta.df)
 
 well.actions = rows_to_actions(meta.df)
-wells = make_wells(meta.df)
-
-# Convert the well.actions to lists
-
-
-
+wells = make_wells(meta.df, well.actions)
+action.lists = lapply(well.actions,action.df.as.list)
 
 
 

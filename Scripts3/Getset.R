@@ -37,6 +37,32 @@ filename.wellList = function(x) vapply(x,"[[","","file")
 "filename<-.well" = function(x,value) x[["file"]] = value
 "filename<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["file"]] = value[i]; x }
 
+index = function(x) UseMethod("index",x)
+index.action = function(x) x[["i"]]
+index.actionList = function(x) vapply(x,"[[",1,"i")
+"index<-" = function(x,value) UseMethod("i<-",x)
+"index<-.action" = function(x,value) x[["i"]] = value
+"index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
+
+filename = function(x) UseMethod("filename",x)
+filename.well = function(x) x[["file"]]
+filename.wellList = function(x) vapply(x,"[[","","file")
+"filename<-" = function(x,value) UseMethod("filename<-",x)
+"filename<-.well" = function(x,value) x[["file"]] = value
+"filename<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["file"]] = value[i]; x }
+
+ID = function(x) UseMethod("ID",x)
+ID.action = function(x) x[["ID"]]
+ID.actionList = function(x) vapply(x,"[[","","ID")
+"ID<-" = function(x,value) UseMethod("ID<-",x)
+"ID<-.action" = function(x,value) x[["ID"]] = value
+"ID<-.actionList" = function(x,value) { 
+  for(i in seq_along(x)) x[[i]][["code"]] = value[i]
+  names(x) = value
+  x
+}
+
+
 
 ####### Custom selector functions
 custom.df.selector = function(x, i=NULL, j=NULL, class) {
