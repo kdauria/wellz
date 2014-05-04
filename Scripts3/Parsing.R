@@ -1,8 +1,11 @@
 library(zoo)
 library(stringr)
+library(plyr)
+library(data.table)
 source("./Scripts3/Parsing_expand.R")
 source("./Scripts3/Getset.R")
 source("./Scripts3/General.R")
+source("./Scripts3/Solutions.R")
 
 metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
 metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
@@ -56,8 +59,9 @@ colclasses_metadata = function(meta.df, numeric.cols=c("i","rmVol","adVol","conc
 row_to_action = function( x ) {
   # Make a solution object
   solution = list()
-  solution$solvent = data.frame(name=x$solvent[1],perc=100)
+  solution$solvent = data.frame(name=x$solvent[1],perc=100,stringsAsFactors=FALSE)
   solution$compounds = na.omit( x[,c("name","conc","type")] )
+  rownames(solution$compounds) = NULL
   solution$volume = x$adVol[1]
   class(solution) = c("Solution","list")
   
@@ -105,26 +109,32 @@ action.df.as.list = function(x) {
   action.list
 }
 
+# 8. Save the actions to the wells
+# Example CODE: actionList(wells) = action.lists
 
+# 9. Set actions' solutions as the sum of previous actions' solutions
+# Example CODE...
+# for( i in seq_along(wells) ) 
+#   solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
+
+# 10. Add data to wells
+
+
+
+# Parse the metadata
 meta.df = read_metadata(metadata,data.dir)
 meta.df = fillblanks_metadata(meta.df)
 meta.df = expand_actions(meta.df)
 meta.df = colclasses_metadata(meta.df)
 
+# Make the wells and solutions
 well.actions = rows_to_actions(meta.df)
 wells = make_wells(meta.df, well.actions)
 action.lists = lapply(well.actions,action.df.as.list)
+actionList(wells) = action.lists
 
-
-
-
-
-
-
-
-
-
-
+for( i in seq_along(wells) ) 
+  solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
 
 
 

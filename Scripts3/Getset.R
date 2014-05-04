@@ -22,7 +22,7 @@ search.well = function(well,filename=NULL,code=NULL) {
   yn
 }
 
-####### access and set different elements of wells and wellLists
+####### access and set different elements of wells, wellLists, actions, and actionLists
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]
 code.wellList = function(x) vapply(x,"[[","","code")
@@ -43,6 +43,20 @@ index.actionList = function(x) vapply(x,"[[",1,"i")
 "index<-" = function(x,value) UseMethod("i<-",x)
 "index<-.action" = function(x,value) x[["i"]] = value
 "index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
+
+solution = function(x) UseMethod("solution",x)
+solution.action = function(x) x[["solution"]]
+solution.actionList = function(x) lapply(x,"[[","solution")
+solution.well = function(x) solution(x$actions)
+"solution<-" = function(x,value) UseMethod("solution<-",x)
+"solution<-.action" = function(x,value) x[["solution"]] = value
+"solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
+"solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
+
+actionList = function(x) UseMethod("actionList",x)
+actionList.wellList = function(x) vapply(x,"[[","","actions")
+"actionList<-" = function(x,value) UseMethod("actionList<-",x)
+"actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 
 filename = function(x) UseMethod("filename",x)
 filename.well = function(x) x[["file"]]
