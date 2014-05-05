@@ -16,7 +16,7 @@ data.dir = "./Data/"
 
 wells = parse_metadata(metadata,data.dir,parse_rtca)
 
-
+library(profr)
 aa = profr(parse_metadata(metadata,data.dir,parse_rtca))
 plot(aa)
 
@@ -26,10 +26,3 @@ Rprof(NULL)
 summaryRprof()
 
 
-library(profr)
-
-
-glm_ex <- profr({Sys.sleep(1); example(glm)}, 0.01)
-head(glm_ex)
-summary(glm_ex)
-plot(glm_ex)

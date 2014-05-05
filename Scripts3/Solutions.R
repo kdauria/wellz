@@ -13,9 +13,34 @@
 }
 
 # wrapper for adding/subtracting compounds in solution one by one (using ddply, not loops)
-add_compounds = function( s1, s2 ) {
-  allcomps = rbind_compounds(s1,s2)
-  ddply(allcomps,.(name),add_compound_df,c(s1$volume,s2$volume))
+add_compounds = function(s1, s2) {
+  vols = c(s1$volume,s2$volume)
+  nms = unique(c(s1$compounds$name, s2$compounds$name))
+  out = data.frame(name=nms,conc=0,type="start",stringsAsFactors=FALSE)
+  for( i in nms ) {
+    r1 = s1$compounds[ s1$compounds$name==i, ]
+    r2 = s2$compounds[ s2$compounds$name==i, ]
+    conc = c(r1$conc,r1$conc)
+    type = c(r1$type,r2$type)
+    id = (1:2)[as.logical( c(length(r1$conc),length(r2$conc)))]
+  
+    if( length(type)==2 && sum(type=="total")==1 )
+      stop("Either all or none of the 'type's for each compound must be 'total'")
+    if( sum(type=="final")==2 )
+      stop("Both compounds cannot be of type 'final'")
+    
+    if( "final" %in% type ) {
+      cf = conc[ type=="final" ]
+      type[1] = "start"
+    } else {
+      cf = switch(type[1],
+                  start = sum( vols[id] * conc[id] ) / sum(vols) ,
+                  total = sum(conc) )
+    }
+    out[ out$name==i, "conc" ] = cf
+    out[ out$name==i, "type" ] = type[1]
+  }
+  out
 }
 subtract_compounds = function( s1, s2 ) {
   if( "final" %in% c(s1$compounds$type,s2$compounds$type) )
@@ -26,23 +51,8 @@ subtract_compounds = function( s1, s2 ) {
   ddply(allcomps,.(name),subtract_compound_df,c(s1$volume,s2$volume))
 }
 
+
 # adding/subtracting compounds from different solutions
-add_compound_df = function(x,vols) {
-  
-  if( length(x$type)==2 && sum(x$type=="total")==1 )
-    stop("Either all or none of the 'type's for each compound must be 'total'")
-  if( sum(x$type=="final")==2 )
-    stop("Both compounds cannot be of type 'final'")
-  if( "final" %in% x$type ) {
-    cf = x$conc[ x$type=="final" ]
-    x$type[1] = "start"
-  } else {
-    cf = switch(x$type[1],
-                start = sum( vols[x$i] * x$conc[x$i] ) / sum(vols) ,
-                total = sum(x$conc) )
-  }
-  data.frame(conc=cf,type=x$type[1],stringsAsFactors=FALSE)
-}
 subtract_compound_df = function(x,vols) {
   if( length(x)==2 && sum(x=="total")==1 )
     stop("Either all or none of the 'type's for each compound must be 'total'")
