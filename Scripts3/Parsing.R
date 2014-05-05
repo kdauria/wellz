@@ -1,15 +1,24 @@
-library(zoo)
-library(stringr)
-library(plyr)
-library(data.table)
-source("./Scripts3/Parsing_expand.R")
-source("./Scripts3/Getset.R")
-source("./Scripts3/General.R")
-source("./Scripts3/Solutions.R")
 
-metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
-metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
-data.dir = "./Data/"
+# Wrapper function
+parse_metadata = function( metadata, data.dir, parse_fun ) {
+
+  # Parse the metadata
+  meta.df = read_metadata(metadata,data.dir)
+  meta.df = fillblanks_metadata(meta.df)
+  meta.df = expand_actions(meta.df)
+  meta.df = colclasses_metadata(meta.df)
+  
+  # Make the wells and solutions
+  well.actions = rows_to_actions(meta.df)
+  wells = make_wells(meta.df, well.actions)
+  action.lists = lapply(well.actions,action.df.as.list)
+  actionList(wells) = action.lists
+  
+  for( i in seq_along(wells) ) 
+    solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
+  
+  #wells = add_data(wells, data.dir, parse_fun )
+}
 
 # 1. Read the data into R
 read_metadata = function( metadata, data.dir, sep="\t" ) {
@@ -80,7 +89,7 @@ rows_to_actions = function( meta.df ) {
         paste(all.actions$file,all.actions$code))
 }
 
-# 6. Create wells object from the actions
+# 6. Create well object from the actions
 make_wells = function(meta.df, well.actions) {
   # Create empty well objects and the wellList
   template.well = list(file=NA,code=NA,actions=NA)
@@ -118,25 +127,7 @@ action.df.as.list = function(x) {
 #   solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
 
 # 10. Add data to wells
-
-
-
-# Parse the metadata
-meta.df = read_metadata(metadata,data.dir)
-meta.df = fillblanks_metadata(meta.df)
-meta.df = expand_actions(meta.df)
-meta.df = colclasses_metadata(meta.df)
-
-# Make the wells and solutions
-well.actions = rows_to_actions(meta.df)
-wells = make_wells(meta.df, well.actions)
-action.lists = lapply(well.actions,action.df.as.list)
-actionList(wells) = action.lists
-
-for( i in seq_along(wells) ) 
-  solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
-
-
+# Example CODE: wells = add_data(wells,data.dir)
 
 
 
