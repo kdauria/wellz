@@ -59,18 +59,21 @@ subtract_compound_df = function(x,vols) {
 
 # Adding/subtracting solvents
 change_solvent = function(s1,s2,fun) {
-  solvents = rbind(data.frame(s1$solvent,vol=s1$volume), 
-                   data.frame(s2$solvent,vol=s2$volume))
-  solvents = ddply(solvents, .(name), 
-                   function(x) data.frame(perc=fun(x$perc*x$vol) ) )
-  solvents$perc = 100 * solvents$perc / fun(solvents$perc)
-  solvents
+  nms = unique( c(s1$solvent$name, s2$solvent$name) )
+  out = data.frame(name=nms,perc=0)
+  for( i in nms ) {
+    out[out$name==i,"perc"] = 
+      max(0,s1$solvent$perc[ s1$solvent$name %in% i ]*s1$volume) +
+      max(0,s2$solvent$perc[ s2$solvent$name %in% i ]*s2$volume)
+  }
+  out$perc = 100*out$perc/sum(out$perc)
+  out
 }
 
 # Helper functions
 subtract = function(x) Reduce(`-`, x)
 rbind_compounds = function(s1,s2) {
-  rbind( data.frame(s1$compounds,i=integer(nrow(s1$compounds))+1), 
-         data.frame(s2$compounds,i=integer(nrow(s2$compounds))+2) )
+  rbind.data.frame( data.frame(s1$compounds,i=integer(nrow(s1$compounds))+1), 
+                    data.frame(s2$compounds,i=integer(nrow(s2$compounds))+2) )
 }
 
