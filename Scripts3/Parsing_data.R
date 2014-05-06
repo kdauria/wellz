@@ -3,7 +3,6 @@
 add_data = function(x,...) UseMethod("add_data",x)
 add_data.wellList = function( wells, data.dir, parse_fun ) {
 
-  parse_fun = parse_rtca
   allfiles = filename(wells)
   allcodes = code(wells)
   codes = split( allcodes, allfiles )

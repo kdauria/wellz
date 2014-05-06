@@ -27,7 +27,17 @@ roster = function(wells) {
   data.frame( file=filename(wells), code=code(wells) ) 
 }
 
-
+# Don't lose class when subsetting
+`[.wellList` = function( x, i ) {
+  r = NextMethod("[")
+  mostattributes(r) = attributes(x)
+  r
+}
+c.wellList = function(x,...) {
+  r = NextMethod("c")
+  mostattributes(r) = attributes(x)
+  r
+}
 
 
 ####### access and set different elements of wells, wellLists, actions, and actionLists
@@ -145,6 +155,15 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
   for(i in seq_along(x)) x[[i]][["code"]] = value[i]
   names(x) = value
   x
+}
+
+compound_names = function(x,...) UseMethod("compound_names",x)
+compound_names.Solution = function(x) x$compounds$name
+compound_names.well = function(x,ID=length(x$actions),types="start") {
+  x$actions[[ID]]$solution$compounds$name[x$actions[[ID]]$solution$compounds$type %in% types]
+}
+compound_names.wellList = function(x,...) {
+  unique(unlist(lapply(x,compound_names,...)))
 }
 
 
