@@ -3,30 +3,23 @@
 parse_metadata = function( metadata, data.dir, parse_fun ) {
 
   # Parse the metadata
+  message("Parsing metadata")
   meta.df = read_metadata(metadata,data.dir)
   meta.df = fillblanks_metadata(meta.df)
-  meta.df = expand_actions(meta.df)
-  meta.df = colclasses_metadata(meta.df)
-  
-  # Make the wells and solutions
-  well.actions = rows_to_actions(meta.df)
-  wells = make_wells(meta.df, well.actions)
-  action.lists = lapply(well.actions,action.df.as.list)
-  actionList(wells) = action.lists
-  
+  wells = metadata_to_wells(meta.df)
   for( i in seq_along(wells) )
     solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
   
-  #wells = add_data(wells, data.dir, parse_fun )
+  wells = add_data(wells, data.dir, parse_fun )
 }
 
-# 1. Read the data into R
+# Read the data into R
 read_metadata = function( metadata, data.dir, sep="\t" ) {
   read.csv(file=metadata,header=TRUE,sep=sep,
                stringsAsFactors=FALSE,strip.white=TRUE)
 }
 
-# 2. Fill in empty cells with the value from above column
+# Fill in empty cells with the value from above column
 fillblanks_metadata = function(x) {
   x[x==""] = NA
   x = na.locf(x)
@@ -34,10 +27,7 @@ fillblanks_metadata = function(x) {
   x
 }
 
-# 3. Expand comma-separated shorthand
-
-
-
+# Expand comma-separated shorthand
 expand_action = function( df ) {
   codes = expand_code( df$wells )
   nc = nrow(df) # number of compounds
@@ -50,88 +40,78 @@ expand_action = function( df ) {
     comma.cols = grepl(",",row)
     
     if(any(comma.cols)) {
-      split.df = matrix( comma_split(row[comma.cols]) , nrow=nw )
+      split.df = matrix( strsplit(row[comma.cols],"[ ]*,[ ]*")[[1]] , nrow=nw )
       newdf[ 0:(nw-1)*nc+i, comma.cols ] = split.df
     }
   }
   newdf
 }
-expand_actions = function(meta.df) {
-  action.rows = split(meta.df,paste(meta.df$wells,meta.df$ID))
-  do.call( rbind, lapply(action.rows,expand_action) )
-}
 
-# 4. Set some columns to be numeric
+# Set some columns to be numeric
 colclasses_metadata = function(meta.df, numeric.cols=c("i","rmVol","adVol","conc") ) {
   meta.df[,numeric.cols] = apply(meta.df[,numeric.cols],2,as.numeric)
   meta.df
 }
 
-# 5. Create a list of actions for each well
-row_to_action = function( x ) {
-  # Make a solution object
-  solution = list()
-  solution$solvent = data.frame(name=x$solvent[1],perc=100,stringsAsFactors=FALSE)
-  solution$compounds = na.omit( x[,c("name","conc","type")] )
-  rownames(solution$compounds) = NULL
-  solution$volume = x$adVol[1]
-  class(solution) = c("Solution","list")
+# Convert the metadata to wells
+metadata_to_wells = function( meta.df ) {
   
-  # Make the action object
-  data.frame(file=x$file[1], code=x$wells[1],
-              ID=x$ID[1], i=x$i[1], 
-              rmVol=x$rmVol[1], solution=I(list(solution)),
-              stringsAsFactors=FALSE)
-
-}
-rows_to_actions = function( meta.df ) {
-  action.rows = split(meta.df,paste(meta.df$file,meta.df$wells,meta.df$ID))
-  all.actions = do.call(rbind, lapply(action.rows,row_to_action) )
-  all.actions = all.actions[order(all.actions$i,all.actions$file,all.actions$code),]
-  split(all.actions[,c("ID","i","rmVol","solution")], 
-        paste(all.actions$file,all.actions$code))
-}
-
-# 6. Create well object from the actions
-make_wells = function(meta.df, well.actions) {
-  # Create empty well objects and the wellList
-  template.well = list(file=NA,code=NA,actions=NA)
-  class(template.well) = c("well","list")
-  wells = rep(list(template.well),length(well.actions))
-  class(wells) = c("wellList","list")
+  # Figure out how many actions and in what rows they start
+  cond = paste( meta.df$file, meta.df$wells, meta.df$ID )
+  action.idxs = as.numeric(factor(cond,levels=unique(cond)))
+  action.rows = match(unique(action.idxs),action.idxs)
+  action.nrows = diff(c(action.rows,length(action.idxs)+1))
+  nactions = length(action.rows)
   
-  # Fill in the file names and codes
-  wells.df = do.call(rbind, str_split( names(well.actions), " ") )
-  files = 
-  code(wells) = wells.df[,2]
-  filename(wells) = wells.df[,1]
+  # Figure out how many wells there are
+  codes = lapply( meta.df[action.rows,"wells"], expand_code )
+  files = meta.df[action.rows,"file"]
+  roster = data.frame(file=rep(files,times=vapply(codes,length,1)),code=unlist(codes), stringsAsFactors=FALSE )
+  roster = roster[!duplicated(roster),]
+  roster = roster[order(roster$file,roster$code),]
+  
+  # Allocate a wellList for all of the wells
+  template.well = structure(list(file="",code="",
+                                 actions=structure(list(),class=c("actionList","list"))),
+                            class=c("well","list"))
+  wells = structure( rep(list(template.well),nrow(roster)), class=c("wellList","list"))
+  
+  # Add the basic information for each well
+  filename(wells) = roster$file
+  code(wells) = roster$code
+  
+  for( i in 1:nactions ) {
+    
+    nrows = action.nrows[i]
+    rows = meta.df[ action.rows[i] + 1:nrows - 1,  ]
+    newdf = colclasses_metadata(expand_action(rows))
+    
+    for( j in 1:nrow(newdf) ) {
+      x = newdf[j,]
+      solution = list()
+      solution$solvent = data.frame(name=x$solvent[1],perc=100,stringsAsFactors=FALSE)
+      solution$compounds = na.omit( x[,c("name","conc","type")] )
+      rownames(solution$compounds) = NULL
+      solution$volume = x$adVol[1]
+      class(solution) = c("Solution","list")
+      
+      y = list()
+      y$ID = x$ID
+      y$i = x$i
+      y$rmVol = x$rmVol
+      y$solution = solution
+      class(y) = c("action","list")
+      
+      # Append new action
+      well.i = which(x$wells == roster$code & x$file == roster$file)
+      new.actions = structure( c( wells[[well.i]]$actions, structure(list(y),names=x$ID) ),
+                               class=c("actionList","list"))
+      wells[[well.i]]$actions = structure( new.actions[ order(index(new.actions)) ],
+                                           class=c("actionList","list"))
+    }
+  }
   wells
 }
-
-# 7. Convert the well.actions to lists
-action.as.list = function(x) {
-  x = as.list(x)
-  class(x) = c("action","list")
-  x
-}
-action.df.as.list = function(x) {
-  action.list = apply( x, 1, action.as.list )
-  class(action.list) = c("actionList","list")
-  names(action.list) = ID(action.list)
-  action.list
-}
-
-# 8. Save the actions to the wells
-# Example CODE: actionList(wells) = action.lists
-
-# 9. Set actions' solutions as the sum of previous actions' solutions
-# Example CODE...
-# for( i in seq_along(wells) ) 
-#   solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
-
-# 10. Add data to wells
-# Example CODE: wells = add_data(wells,data.dir)
-
 
 
 

@@ -20,7 +20,7 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
         warning(paste("Well",codes.i[j],"not in file",files[i]))
         next
       }
-      select(wells, files[i], codes.i[j] )$data = dat[,c("i","t",codes.i[j]),with=FALSE]
+      #select(wells, files[i], codes.i[j] )$data = dat[,c("i","t",codes.i[j]),with=FALSE]
     }
   }
   wells

@@ -3,12 +3,12 @@
 select = function(x, ...) UseMethod("select",x)
 select.wellList = function(wells, ...) {
   yn = search(wells, ...)
-  wells[[which(yn)]]
+  wells[which(yn)]
 }
 "select<-" = function(x, ...) UseMethod("select<-",x)
 "select<-.wellList" = function(wells, value, ...) {
   yn = search(wells, ...)
-  wells[[which(yn)]] = value
+  wells[which(yn)] = value
   wells
 }
 
@@ -69,7 +69,7 @@ cppFunction('
             return out;  }')
 "filename<-" = function(x,value) UseMethod("filename<-",x)
 "filename<-.well" = function(x,value) x[["file"]] = value
-"filename<-.wellList" = function(x,value) filename_replace(rcpp,value)
+"filename<-.wellList" = function(x,value) filename_replace_rcpp(x,value)
 cppFunction('
   List filename_replace_rcpp( List x, CharacterVector value) {
             List temp;
@@ -83,12 +83,37 @@ cppFunction('
             out.attr("class") = x.attr("class");
             return out;  }')
 
+
 index = function(x) UseMethod("index",x)
 index.action = function(x) x[["i"]]
-index.actionList = function(x) vapply(x,"[[",1,"i")
+index.actionList = function(x) index_actionList_rcpp(x)
+cppFunction('
+  NumericVector index_actionList_rcpp( List x ) {
+            List temp;
+            unsigned int n=x.size(), i;
+            NumericVector out(n);
+            for( i = 0; i<n ; i++ ) {
+              temp = as<List>(x[i]);
+              out[i] = as<double>(temp["i"]);
+            }
+            return out;
+            }')
 "index<-" = function(x,value) UseMethod("i<-",x)
 "index<-.action" = function(x,value) x[["i"]] = value
 "index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
+cppFunction('
+  List index_actionList_replace_rcpp( List x, NumericVector value) {
+            List temp;
+            unsigned int n=x.size(), i;
+            List out(n);
+            for( i = 0; i<n ; i++ ) {
+              temp = as<List>(x[i]);
+              temp["i"] = value[i];
+              out[i] = temp;
+            }
+            out.attr("class") = x.attr("class");
+            return out;  }')
+
 
 solution = function(x) UseMethod("solution",x)
 solution.action = function(x) x[["solution"]]
@@ -104,13 +129,6 @@ actionList.wellList = function(x) vapply(x,"[[","","actions")
 "actionList<-" = function(x,value) UseMethod("actionList<-",x)
 "actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 
-filename = function(x) UseMethod("filename",x)
-filename.well = function(x) x[["file"]]
-filename.wellList = function(x) vapply(x,"[[","","file")
-"filename<-" = function(x,value) UseMethod("filename<-",x)
-"filename<-.well" = function(x,value) x[["file"]] = value
-"filename<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["file"]] = value[i]; x }
-
 ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
 ID.actionList = function(x) vapply(x,"[[","","ID")
@@ -125,20 +143,6 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
 
 
 
-
-cppFunction('
-  NumericVector test( List x ) {
-            List temp;
-            unsigned int n=x.size(), i;
-            NumericVector out(n);
-
-            for( i = 0; i<n ; i++ ) {
-              temp = as<List>(x[i]);
-              out[i] = as<double>(temp["a"]);
-            }
-
-            return out;
-            }')
 
 
 
