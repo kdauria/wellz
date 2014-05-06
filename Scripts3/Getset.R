@@ -26,17 +26,62 @@ search.wellList = function(wells,filename=NULL,code=NULL) {
 ####### access and set different elements of wells, wellLists, actions, and actionLists
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]
-code.wellList = function(x) vapply(x,"[[","","code")
+code.wellList = function(x) code_rcpp(x)
+cppFunction('
+  CharacterVector code_rcpp( List x ) {
+            List temp;
+            unsigned int n=x.size(), i;
+            CharacterVector out(n);
+            for( i = 0; i<n ; i++ ) {
+            temp = as<List>(x[i]);
+            out[i] = as<std::string>(temp["code"]);
+            }
+            return out;  }')
 "code<-" = function(x,value) UseMethod("code<-",x)
 "code<-.well" = function(x,value) x[["code"]] = value
-"code<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["code"]] = value[i]; x }
+"code<-.wellList" = function(x,value) code_replace_rcpp(x,value)
+cppFunction('
+  List code_replace_rcpp( List x, CharacterVector value) {
+            List temp;
+            unsigned int n=x.size(), i;
+            List out(n);
+            for( i = 0; i<n ; i++ ) {
+              temp = as<List>(x[i]);
+              temp["code"] = as<std::string>(value[i]);
+              out[i] = temp;
+            }
+            out.attr("class") = x.attr("class");
+            return out;  }')
+
 
 filename = function(x) UseMethod("filename",x)
 filename.well = function(x) x[["file"]]
-filename.wellList = function(x) vapply(x,"[[","","file")
+filename.wellList = function(x) filename_rcpp(x)
+cppFunction('
+  CharacterVector filename_rcpp( List x ) {
+            List temp;
+            unsigned int n=x.size(), i;
+            CharacterVector out(n);
+            for( i = 0; i<n ; i++ ) {
+            temp = as<List>(x[i]);
+            out[i] = as<std::string>(temp["file"]);
+            }
+            return out;  }')
 "filename<-" = function(x,value) UseMethod("filename<-",x)
 "filename<-.well" = function(x,value) x[["file"]] = value
-"filename<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["file"]] = value[i]; x }
+"filename<-.wellList" = function(x,value) filename_replace(rcpp,value)
+cppFunction('
+  List filename_replace_rcpp( List x, CharacterVector value) {
+            List temp;
+            unsigned int n=x.size(), i;
+            List out(n);
+            for( i = 0; i<n ; i++ ) {
+            temp = as<List>(x[i]);
+            temp["file"] = as<std::string>(value[i]);
+            out[i] = temp;
+            }
+            out.attr("class") = x.attr("class");
+            return out;  }')
 
 index = function(x) UseMethod("index",x)
 index.action = function(x) x[["i"]]
@@ -79,46 +124,22 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
 
 
 
-####### Custom selector functions
-# custom.df.selector = function(x, i=NULL, j=NULL, class) {
-#   class(x) = "data.frame"
-#   if( !is.null(i) & is.null(j) ) {
-#     y = x[i,]
-#     class(y) = c(class,"data.frame")
-#   } else if( is.null(i) & !is.null(j) ) {
-#     y = x[,j]
-#   } else {   
-#     y = x[i,j]
-#     if( (is.numeric(j) && length(j)==ncol(x)) ||
-#           (is.logical(j) && sum(j)==ncol(x)) ) {
-#       class(y) = c(class,"data.frame")
-#     }
-#   }
-#   y
-# }
-# `[.well` = function( x, i=NULL, j=NULL ) {
-#   custom.df.selector(x, i, j, "well")
-# }
-# `[.Action` = function( x, i=NULL, j=NULL ) {
-#   custom.df.selector(x, i, j, "Action")
-# }
-# `$.Action` = function( x, nm ) {
-#   class(x) = "data.frame"
-#   if(nrow(x)==1) {
-#     return( x[[nm]][[1]] )
-#   } else {
-#     return( x[[nm]] )
-#   }
-# }
-# `$<-.Action` = function( x, nm, value ) {
-#   class(x) = "data.frame"
-#   if(nrow(x)==1 && nm=="solution") {
-#     x[[nm]] = I(list(value))
-#   } else {
-#     x[[nm]] = value
-#   }
-#   class(x) = c("Action","data.frame")
-#   x
-# }
+
+
+cppFunction('
+  NumericVector test( List x ) {
+            List temp;
+            unsigned int n=x.size(), i;
+            NumericVector out(n);
+
+            for( i = 0; i<n ; i++ ) {
+              temp = as<List>(x[i]);
+              out[i] = as<double>(temp["a"]);
+            }
+
+            return out;
+            }')
+
+
 
 

@@ -14,7 +14,7 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
   action.lists = lapply(well.actions,action.df.as.list)
   actionList(wells) = action.lists
   
-  for( i in seq_along(wells) ) 
+  for( i in seq_along(wells) )
     solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
   
   #wells = add_data(wells, data.dir, parse_fun )
@@ -23,7 +23,7 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
 # 1. Read the data into R
 read_metadata = function( metadata, data.dir, sep="\t" ) {
   read.csv(file=metadata,header=TRUE,sep=sep,
-               stringsAsFactors=FALSE)
+               stringsAsFactors=FALSE,strip.white=TRUE)
 }
 
 # 2. Fill in empty cells with the value from above column
@@ -35,6 +35,9 @@ fillblanks_metadata = function(x) {
 }
 
 # 3. Expand comma-separated shorthand
+
+
+
 expand_action = function( df ) {
   codes = expand_code( df$wells )
   nc = nrow(df) # number of compounds
