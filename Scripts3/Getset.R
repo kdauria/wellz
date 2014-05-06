@@ -23,6 +23,13 @@ search.wellList = function(wells,filename=NULL,code=NULL) {
   yn
 }
 
+roster = function(wells) {
+  data.frame( file=filename(wells), code=code(wells) ) 
+}
+
+
+
+
 ####### access and set different elements of wells, wellLists, actions, and actionLists
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]

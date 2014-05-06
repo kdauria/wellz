@@ -3,11 +3,13 @@
 add_data = function(x,...) UseMethod("add_data",x)
 add_data.wellList = function( wells, data.dir, parse_fun ) {
 
+  parse_fun = parse_rtca
   allfiles = filename(wells)
   allcodes = code(wells)
   codes = split( allcodes, allfiles )
   files = names(codes)
   file.paths = file.path(data.dir,names(codes))
+  r = roster(wells)
   
   for( i in seq_along(file.paths)) {
     
@@ -20,7 +22,8 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
         warning(paste("Well",codes.i[j],"not in file",files[i]))
         next
       }
-      #select(wells, files[i], codes.i[j] )$data = dat[,c("i","t",codes.i[j]),with=FALSE]
+      well.ij = which( files[i] == r$file & codes.i[j] == r$code )
+      wells[[well.ij]]$data = dat[,c("i","t",codes.i[j])]
     }
   }
   wells
@@ -32,10 +35,12 @@ parse_rtca = function(filepath) {
   dat[,i:=1:nrow(dat)]
   cn = colnames(dat)
   for( ii in 2:(ncol(dat)-1) )
-    cn[ii] = paste0( substr(cn[ii],4,4), "0", substr(cn[ii],5,5) )
+    cn[ii] = paste0( substr(cn[ii],4,5) )
   cn[1] = "t"
   setnames(dat,cn)
+  class(dat) = "data.frame"
   dat
 }
+
 
 
