@@ -20,8 +20,11 @@ add_compounds = function(s1, s2) {
   for( i in nms ) {
     r1 = s1$compounds[ s1$compounds$name==i, ]
     r2 = s2$compounds[ s2$compounds$name==i, ]
-    conc = c(r1$conc,r1$conc)
-    type = c(r1$type,r2$type)
+    conc = c(r1$conc, r2$conc)
+    type = c(r1$type, r2$type)
+    
+    # which solutions have the compounds id=[1,2] if both 
+    # or id=1 if only the first solution
     id = (1:2)[as.logical( c(length(r1$conc),length(r2$conc)))]
   
     if( length(type)==2 && sum(type=="total")==1 )
@@ -48,7 +51,7 @@ subtract_compounds = function( s1, s2 ) {
   if( s1$volume <= s2$volume )
     stop("Second solution has more volume than the first")
   allcomps = rbind_compounds(s1,s2)
-  ddply(allcomps,.(name),subtract_compound_df,c(s1$volume,s2$volume))
+  na.omit( ddply(allcomps,.(name),subtract_compound_df,c(s1$volume,s2$volume)) )
 }
 
 
@@ -58,19 +61,21 @@ subtract_compound_df = function(x,vols) {
     stop("Either all or none of the 'type's for each compound must be 'total'")
   
   if( "total" %in% x$type ) {
-    if( subtract( x$conc ) <=0 ) stop("More units in second than first solution")
+    if( subtract( x$conc ) < 0 ) stop("More units in second than first solution")
     cf = subtract( x$conc )
   } else if( "start" %in% x$type ) {
-    if( any( subtract( (vols * x$conc)<=0 ) ) ) stop("More mass in second solution than the first")
+    if( any( subtract( (vols * x$conc) < 0 ) ) ) stop("More mass in second solution than the first")
     cf = subtract( vols[x$i] * x$conc[x$i] ) / subtract(vols)
   }
-  data.frame(conc=cf,type=x$type[1],stringsAsFactors=FALSE)
+  
+  out = data.frame(conc=cf,type=x$type[1],stringsAsFactors=FALSE)
+  out[out$conc!=0]
 }
 
 # Adding/subtracting solvents
 change_solvent = function(s1,s2,fun) {
   nms = unique( c(s1$solvent$name, s2$solvent$name) )
-  out = data.frame(name=nms,perc=0)
+  out = data.frame(name=nms,perc=0,stringsAsFactors=FALSE)
   for( i in nms ) {
     out[out$name==i,"perc"] = 
       max(0,s1$solvent$perc[ s1$solvent$name %in% i ]*s1$volume) +

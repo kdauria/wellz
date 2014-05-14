@@ -66,19 +66,19 @@ metadata_to_wells = function( meta.df ) {
   # Figure out how many wells there are
   codes = lapply( meta.df[action.rows,"wells"], expand_code )
   files = meta.df[action.rows,"file"]
-  roster = data.frame(file=rep(files,times=vapply(codes,length,1)),code=unlist(codes), stringsAsFactors=FALSE )
-  roster = roster[!duplicated(roster),]
-  roster = roster[order(roster$file,roster$code),]
+  rost = data.frame(file=rep(files,times=vapply(codes,length,1)),code=unlist(codes), stringsAsFactors=FALSE )
+  rost = rost[!duplicated(rost),]
+  rost = rost[order(rost$file,rost$code),]
   
   # Allocate a wellList for all of the wells
   template.well = structure(list(file="",code="",
                                  actions=structure(list(),class=c("actionList","list"))),
                             class=c("well","list"))
-  wells = structure( rep(list(template.well),nrow(roster)), class=c("wellList","list"))
+  wells = structure( rep(list(template.well),nrow(rost)), class=c("wellList","list"))
   
   # Add the basic information for each well
-  filename(wells) = roster$file
-  code(wells) = roster$code
+  filename(wells) = rost$file
+  code(wells) = rost$code
   
   for( i in 1:nactions ) {
     
@@ -103,7 +103,7 @@ metadata_to_wells = function( meta.df ) {
       class(y) = c("action","list")
       
       # Append new action
-      well.i = which(x$wells == roster$code & x$file == roster$file)
+      well.i = which(x$wells == rost$code & x$file == rost$file)
       new.actions = structure( c( wells[[well.i]]$actions, structure(list(y),names=x$ID) ),
                                class=c("actionList","list"))
       wells[[well.i]]$actions = structure( new.actions[ order(index(new.actions)) ],

@@ -142,7 +142,8 @@ solution.well = function(x) solution(x$actions)
 "solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
 
 actionList = function(x) UseMethod("actionList",x)
-actionList.wellList = function(x) vapply(x,"[[","","actions")
+actionList.well = function(x) x$actions
+actionList.wellList = function(x) lapply(x,"[[","actions")
 "actionList<-" = function(x,value) UseMethod("actionList<-",x)
 "actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 

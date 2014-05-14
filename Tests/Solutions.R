@@ -26,6 +26,20 @@ s2 = list(solvent=data.frame(name="media",perc=100,stringsAsFactors=FALSE),
           volume=22.2)
 class(s1) = class(s2) = c("Solution","list")
 
+# Test 4
+s1 = list(solvent=data.frame(name="media",perc=100,stringsAsFactors=FALSE),
+          compounds=na.omit(data.frame(name=NA,conc=NA,type=NA,stringsAsFactors=FALSE)),
+          volume=100)
+s2 = list(solvent=data.frame(name="media",perc=100,stringsAsFactors=FALSE),
+          compounds=na.omit(data.frame(name="IMCE",conc=30000,type="total",stringsAsFactors=FALSE)),
+          volume=100)
+s3 = list(solvent=data.frame(name="media",perc=100,stringsAsFactors=FALSE),
+          compounds=na.omit(data.frame(name="TcdA",conc=1000,type="final",stringsAsFactors=FALSE)),
+          volume=22.2)
+class(s1) = class(s2) = class(s3) = c("Solution","list")
+sa = s1 + s2
+
+
 Rprof(interval=0.001)
 for(i in 1:500) s1+s2
 Rprof(NULL)

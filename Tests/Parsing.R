@@ -9,6 +9,7 @@ source("./Scripts3/Parsing_data.R")
 source("./Scripts3/Getset.R")
 source("./Scripts3/General.R")
 source("./Scripts3/Solutions.R")
+source("./Scripts3/Print.R")
 
 metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
 metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
