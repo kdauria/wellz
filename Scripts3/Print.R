@@ -1,20 +1,25 @@
 print.wellList = function( wells, printall=FALSE, IDw="last" ) {
   
   files = filename(wells)
-  if( unique(files)==1 || length(wells)<20 || printall ) {
+  if( unique(files)==1 || length(wells)<33 || printall ) {
     
+    # get information for every single well in a data.frame
     out = list()
     out$file = files
     out$loc = code(wells)
-    
     solns = lapply(wells, function(x) solution(x,ID=IDw))
     out$compounds = sapply(solns, compound_string, type="start")
-    
-    out$compounds[ sapply(solns,is.null) ] = paste0("No", IDw, " ID")
-    
+    out$compounds[ sapply(solns,is.null) ] = paste0("No ", IDw, " ID")
     out$total = sapply(solns, compound_string, type="total", wConc=FALSE)
-    as.data.frame(out)
+    out = as.data.frame(out, stringsAsFactors=FALSE)
     
+    # Add "ditto"s for repeated rows
+    if(nrow(out)>1) {
+      for( i in nrow(out):2 ) {
+        out[ i, out[i,] == out[i-1,] ] = "-"
+      }
+    }
+    print(out)
   } else {
     r = data.frame( roster(wells), w=1:length(wells) )
     rs = split( r$w, r$file )
@@ -37,15 +42,17 @@ print.well = function( well ) {
   cat("Final solution:\n")
   print( solution(well,ID="last") )
   
-  cat("\n\n")
-  cat( nrow(well$data), "data points\n" )
-  print_well_data(well$data)
+  if(length(well$data)!=0) {
+    cat("\n\n")
+    print_well_data(well$data)
+  }
 }
 
 print_well_data = function(data) {
   if( nrow(data) > 10 ) {
     top = data[1:5,]
     bottom = tail(data,5)
+    cat( nrow(data), "data points\n" )
     print( rbind(top,"---",bottom), row.names=FALSE)
   } else {
     print(data, row.names=FALSE )
@@ -92,18 +99,19 @@ print.actionList = function( actionlist ) {
   out$ID = ID(actionlist)
   out$i = index(actionlist)
   out$rmVol = sapply(actionlist,"[[","rmVol")
-  if( all(out$rmVol==0) ) out$rmVol=NULL
   
   # Subtract solutions to figure out what was added
   # at each action
   solns = solution(actionlist)
   if(length(solns)>1) 
-    solns[-1] = Map("-",solns[-1], solns[-length(solns)])
+    solns[-1] = Map("-.Solution",solns[-1], solns[-length(solns)], out$rmVol[-1])
+  
   
   out$adVol = sapply(solns,"[[","volume")
   out$compounds = vapply( solns, compound_string, "" )
   out$solvent = vapply( solns, solvent_string, "" )
   if( length(unique(out$solvent))==1 ) out$solvent=NULL
+  if( all(out$rmVol==0) ) out$rmVol=NULL
   
   out = as.data.frame(out)
   print(out,row.names=FALSE)

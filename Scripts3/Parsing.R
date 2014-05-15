@@ -14,7 +14,7 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
       wells[[i]]$actions[[j]]$solution = 
         `+.Solution`(s1 = wells[[i]]$actions[[j-1]]$solution,
                      s2 = wells[[i]]$actions[[j]]$solution,
-                     rmVol = wells[[i]]$actions[[j-1]]$rmVol)
+                     rmVol = wells[[i]]$actions[[j]]$rmVol)
     }
   }
   

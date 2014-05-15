@@ -32,11 +32,12 @@ add_compounds = function(s1, s2) {
   for( i in nms ) {
     r1 = s1$compounds[ s1$compounds$name==i, ]
     r2 = s2$compounds[ s2$compounds$name==i, ]
-    conc = c(r1$conc, r2$conc)
+    conc = c( ifelse(length(r1$conc),r1$conc,0) , 
+              ifelse(length(r2$conc),r2$conc,0) )
     type = c(r1$type, r2$type)
     
-    # which solutions have the compounds id=[1,2] if both 
-    # or id=1 if only the first solution
+    # which solutions have the compound. E.g. id=[1,2] if both  do
+    # or id=1 if only the first solution does
     id = (1:2)[as.logical( c(length(r1$conc),length(r2$conc)))]
   
     if( length(type)==2 && sum(type=="total")==1 )
@@ -45,7 +46,7 @@ add_compounds = function(s1, s2) {
       stop("Both compounds cannot be of type 'final'")
     
     if( "final" %in% type ) {
-      cf = conc[ type=="final" ]
+      cf = conc[ type=="final" & conc!=0 ]
       type[1] = "start"
     } else {
       cf = switch(type[1],

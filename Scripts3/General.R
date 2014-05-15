@@ -12,7 +12,12 @@ invert_list = function(x) {
 text_ranges = function(x) {
   right = c( which( diff(x)!=1 ), length(x) )
   left = c(1, right[-length(right)]+1)
-  paste( x[left], x[right], sep="-", collapse=", " )
+  right = x[right]
+  left = x[left]
+  
+  ranges = mapply( function(x,y) ifelse(x==y, x, paste(x,y,sep="-")),
+               left, right )
+  paste(ranges,collapse=", ")
 }
 
 # Custom number format for numbers above/below 1

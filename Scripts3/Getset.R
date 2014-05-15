@@ -147,6 +147,7 @@ solution.actionList = function(x,ID=NA) {
   return(out)
 }
 solution.well = function(x,...) solution(x$actions,...)
+solution.wellList = function(x,ID="last") lapply(x,solution,ID)
 "solution<-" = function(x,value) UseMethod("solution<-",x)
 "solution<-.action" = function(x,value) x[["solution"]] = value
 "solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
