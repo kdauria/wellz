@@ -7,8 +7,16 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
   meta.df = read_metadata(metadata,data.dir)
   meta.df = fillblanks_metadata(meta.df)
   wells = metadata_to_wells(meta.df)
-  for( i in seq_along(wells) )
-    solution(wells[[i]]) = Reduce(`+`,solution(wells[[i]]),accumulate=TRUE)
+  
+  # Add solutions of different "actions" to get status of well
+  for( i in seq_along(wells) ) {
+    for( j in 2:length(wells[[i]]$actions)) {
+      wells[[i]]$actions[[j]]$solution = 
+        `+.Solution`(s1 = wells[[i]]$actions[[j-1]]$solution,
+                     s2 = wells[[i]]$actions[[j]]$solution,
+                     rmVol = wells[[i]]$actions[[j-1]]$rmVol)
+    }
+  }
   
   wells = add_data(wells, data.dir, parse_fun )
 }
@@ -85,26 +93,27 @@ metadata_to_wells = function( meta.df ) {
     nrows = action.nrows[i]
     rows = meta.df[ action.rows[i] + 1:nrows - 1,  ]
     newdf = colclasses_metadata(expand_action(rows))
+    codes = unique(newdf$wells)
     
-    for( j in 1:nrow(newdf) ) {
-      x = newdf[j,]
-      solution = list()
-      solution$solvent = data.frame(name=x$solvent[1],perc=100,stringsAsFactors=FALSE)
-      solution$compounds = na.omit( x[,c("name","conc","type")] )
-      rownames(solution$compounds) = NULL
-      solution$volume = x$adVol[1]
-      class(solution) = c("Solution","list")
+    for( j in 1:length(codes) ) {
+      x = newdf[newdf$wells==codes[j],]
+      soln = list()
+      soln$solvent = data.frame(name=x$solvent[1],perc=100,stringsAsFactors=FALSE)
+      soln$compounds = na.omit( x[,c("name","conc","type")] )
+      rownames(soln$compounds) = NULL
+      soln$volume = x$adVol[1]
+      class(soln) = c("Solution","list")
       
       y = list()
-      y$ID = x$ID
-      y$i = x$i
-      y$rmVol = x$rmVol
-      y$solution = solution
+      y$ID = x$ID[1]
+      y$i = x$i[1]
+      y$rmVol = x$rmVol[1]
+      y$solution = soln
       class(y) = c("action","list")
       
       # Append new action
-      well.i = which(x$wells == rost$code & x$file == rost$file)
-      new.actions = structure( c( wells[[well.i]]$actions, structure(list(y),names=x$ID) ),
+      well.i = which(x$wells[1] == rost$code & x$file[1] == rost$file)
+      new.actions = structure( c( wells[[well.i]]$actions, structure(list(y),names=y$ID )),
                                class=c("actionList","list"))
       wells[[well.i]]$actions = structure( new.actions[ order(index(new.actions)) ],
                                            class=c("actionList","list"))

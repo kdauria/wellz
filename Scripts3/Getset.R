@@ -132,10 +132,21 @@ cppFunction('
             return out;  }')
 
 
-solution = function(x) UseMethod("solution",x)
+solution = function(x,...) UseMethod("solution",x)
 solution.action = function(x) x[["solution"]]
-solution.actionList = function(x) lapply(x,"[[","solution")
-solution.well = function(x) solution(x$actions)
+solution.actionList = function(x,ID=NA) {
+  if(!is.na(ID)) {
+    if(ID=="last") {
+      out = x[[length(x)]]$solution
+    } else {
+      out = x[[ID]]$solution
+    }
+  } else {
+    out = lapply(x,"[[","solution")
+  }
+  return(out)
+}
+solution.well = function(x,...) solution(x$actions,...)
 "solution<-" = function(x,value) UseMethod("solution<-",x)
 "solution<-.action" = function(x,value) x[["solution"]] = value
 "solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
@@ -159,9 +170,20 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
 }
 
 compound_names = function(x,...) UseMethod("compound_names",x)
-compound_names.Solution = function(x) x$compounds$name
-compound_names.well = function(x,ID=length(x$actions),types="start") {
-  x$actions[[ID]]$solution$compounds$name[x$actions[[ID]]$solution$compounds$type %in% types]
+compound_names.Solution = function(x,type="all") {
+  if( type=="all" ) {
+    return( x$compounds$name )
+  } else {
+    return( x$compounds$name[ x$compounds$type==type ] )
+  }  
+}
+compound_names.well = function(x,ID=length(x$actions),type="start") {
+  if( length(x$actions)==0 ) {
+    return( "" )
+  } else {
+    return(x$actions[[ID]]$solution$compounds$name[  
+      x$actions[[ID]]$solution$compounds$type %in% type] )
+  }
 }
 compound_names.wellList = function(x,...) {
   unique(unlist(lapply(x,compound_names,...)))

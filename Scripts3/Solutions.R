@@ -1,15 +1,27 @@
 # S3 generics for "Solution" objects
-`+.Solution` = function(s1,s2) {
+`+.Solution` = function(s1,s2, rmVol=0) {
+  if( rmVol > 0 ) s1$volume = s1$volume - rmVol
   structure( list( solvent=change_solvent( s1, s2, sum), 
              compounds=add_compounds( s1, s2 ), 
              volume=s1$volume+s2$volume),
              class=c("Solution","list"))
 }
-`-.Solution` = function(s1, s2) {
-  structure( list( solvent=change_solvent( s1, s2, subtract), 
-             compounds=subtract_compounds( s1, s2 ) , 
-             volume=s1$volume-s2$volume),
-             class=c("Solution","list"))
+`-.Solution` = function(s1, s2, rmVol=0 ) {
+  if( rmVol > 0 ) s2$volume = s2$volume - rmVol
+  
+  if( identical(s1,s2) ) {
+    s1$solvent = s1$solvent[NULL,]
+    s1$compounds = s1$compounds[NULL,]
+    s1$volume = 0
+    return(s1)
+  } else if( s1$volume==s2$volume ) {
+    stop("Subtracting different solutions with same volume")
+  } else {
+    structure( list( solvent=change_solvent( s1, s2, subtract), 
+               compounds=subtract_compounds( s1, s2 ) , 
+               volume=s1$volume-s2$volume),
+               class=c("Solution","list"))
+  }
 }
 
 # wrapper for adding/subtracting compounds in solution one by one (using ddply, not loops)
@@ -48,8 +60,9 @@ add_compounds = function(s1, s2) {
 subtract_compounds = function( s1, s2 ) {
   if( "final" %in% c(s1$compounds$type,s2$compounds$type) )
     stop("Cannot subtract solutions if one of the compounds is of type 'final'")
-  if( s1$volume <= s2$volume )
+  if( s1$volume < s2$volume )
     stop("Second solution has more volume than the first")
+  
   allcomps = rbind_compounds(s1,s2)
   na.omit( ddply(allcomps,.(name),subtract_compound_df,c(s1$volume,s2$volume)) )
 }
@@ -69,7 +82,7 @@ subtract_compound_df = function(x,vols) {
   }
   
   out = data.frame(conc=cf,type=x$type[1],stringsAsFactors=FALSE)
-  out[out$conc!=0]
+  out[out$conc!=0,]
 }
 
 # Adding/subtracting solvents
