@@ -1,4 +1,4 @@
-print.wellList = function( wells, printall=FALSE, IDw="last" ) {
+print.wellList = function( wells, printall=FALSE, ID="last" ) {
   
   files = filename(wells)
   if( unique(files)==1 || length(wells)<33 || printall ) {
@@ -7,9 +7,9 @@ print.wellList = function( wells, printall=FALSE, IDw="last" ) {
     out = list()
     out$file = files
     out$loc = code(wells)
-    solns = lapply(wells, function(x) solution(x,ID=IDw))
+    solns = lapply(wells, function(x) solution(x,ID=ID))
     out$compounds = sapply(solns, compound_string, type="start")
-    out$compounds[ sapply(solns,is.null) ] = paste0("No ", IDw, " ID")
+    out$compounds[ sapply(solns,is.null) ] = paste0("No ", ID, " ID")
     out$total = sapply(solns, compound_string, type="total", wConc=FALSE)
     out = as.data.frame(out, stringsAsFactors=FALSE)
     
@@ -48,45 +48,6 @@ print.well = function( well ) {
   }
 }
 
-print_well_data = function(data) {
-  if( nrow(data) > 10 ) {
-    top = data[1:5,]
-    bottom = tail(data,5)
-    cat( nrow(data), "data points\n" )
-    print( rbind(top,"---",bottom), row.names=FALSE)
-  } else {
-    print(data, row.names=FALSE )
-  }
-}
-
-# x = c(100.1, 1.23, 1232312.3333, 0.000003, 0.0101001, 1 )
-# floor(log10(x))
-
-
-# summarise the compounds and concentrations into one string
-compound_string = function(soln, type="all", wConc=TRUE ) {
-  
-  yn = switch(type,
-    all = rep(TRUE,nrow(soln$compounds)),
-    total = soln$compounds$type == "total",
-    start = soln$compounds$type == "start" )
-  
-  nms =  soln$compounds$name[yn]
-  if( wConc && length(nms) ) {
-    concs = format1( soln$compounds$conc[yn] )
-    out = paste0( nms, " [", concs, "]", collapse=", " )
-  } else if( length(nms) ) {
-    out = paste0( nms, collapse=", " )
-  } else {
-    out = ""
-  }
-  out
-}
-solvent_string = function(soln) {
-  if( nrow(soln$solvent)==0 ) return ("")
-  paste0( soln$solvent$perc, "% ", soln$solvent$name, collapse=", " )
-}
-
 print.Solution = function( soln ) {
   cat("Volume: ", soln$volume, "\n")  
   if( length(compound_names(soln)) ) cat( compound_string(soln), "\n" )
@@ -118,4 +79,43 @@ print.actionList = function( actionlist ) {
 }
 
 
+
+####### Helper functions ##########
+
+# summarise the compounds and concentrations into one string
+compound_string = function(soln, type="all", wConc=TRUE ) {
+  
+  yn = switch(type,
+              all = rep(TRUE,nrow(soln$compounds)),
+              total = soln$compounds$type == "total",
+              start = soln$compounds$type == "start" )
+  
+  nms =  soln$compounds$name[yn]
+  if( wConc && length(nms) ) {
+    concs = format1( soln$compounds$conc[yn] )
+    out = paste0( nms, " [", concs, "]", collapse=", " )
+  } else if( length(nms) ) {
+    out = paste0( nms, collapse=", " )
+  } else {
+    out = ""
+  }
+  out
+}
+solvent_string = function(soln) {
+  if( nrow(soln$solvent)==0 ) return ("")
+  paste0( soln$solvent$perc, "% ", soln$solvent$name, collapse=", " )
+}
+
+# Print only a few rows of a data.frame
+# Similar to print.data.table
+print_well_data = function(data) {
+  if( nrow(data) > 10 ) {
+    top = data[1:5,]
+    bottom = tail(data,5)
+    cat( nrow(data), "data points\n" )
+    print( rbind(top,"---",bottom), row.names=FALSE)
+  } else {
+    print(data, row.names=FALSE )
+  }
+}
 

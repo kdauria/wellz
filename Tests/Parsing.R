@@ -27,5 +27,12 @@ Rprof(NULL)
 summaryRprof()
 
 
+select(wells)
 
 
+
+
+select.wellList
+
+
+print( paste(comp.name, conc.bounds) )

@@ -1,17 +1,5 @@
 
 ########### Search wells based on parameters
-select = function(x, ...) UseMethod("select",x)
-select.wellList = function(wells, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)]
-}
-"select<-" = function(x, ...) UseMethod("select<-",x)
-"select<-.wellList" = function(wells, value, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)] = value
-  wells
-}
-
 search = function(x,...) UseMethod("search",x)
 search.wellList = function(wells,filename=NULL,code=NULL) {
   
@@ -146,7 +134,7 @@ solution.actionList = function(x,ID=NA) {
   }
   return(out)
 }
-solution.well = function(x,...) solution(x$actions,...)
+solution.well = function(x,ID="last") solution(x$actions,ID)
 solution.wellList = function(x,ID="last") lapply(x,solution,ID)
 "solution<-" = function(x,value) UseMethod("solution<-",x)
 "solution<-.action" = function(x,value) x[["solution"]] = value
