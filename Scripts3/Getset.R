@@ -1,14 +1,15 @@
 
-########### Search wells based on parameters
-search = function(x,...) UseMethod("search",x)
-search.wellList = function(wells,filename=NULL,code=NULL) {
-  
-  # filename & code
-  yn = rep(TRUE,length(wells))
-  if(!is.null(filename)) yn = yn & filename(wells) %in% filename
-  if(!is.null(code)) yn = yn & code(wells) %in% code
-  
-  yn
+# select wells based off of the search.wellList function
+select = function(x, ...) UseMethod("select",x)
+select.wellList = function(wells, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)]
+}
+"select<-" = function(x, ...) UseMethod("select<-",x)
+"select<-.wellList" = function(wells, value, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)] = value
+  wells
 }
 
 roster = function(wells) {

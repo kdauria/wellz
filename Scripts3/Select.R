@@ -1,3 +1,16 @@
+#### Find wells that match the requested parameters
+search = function(x,...) UseMethod("search",x)
+search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL) {
+  
+  # filename & code
+  yn = rep(TRUE,length(wells))
+  if(!is.null(filename)) yn = yn & filename(wells) %in% filename
+  if(!is.null(code)) yn = yn & code(wells) %in% code
+  if(!is.null(compstr)) yn = yn & sapply(wells, match_well_string, compstr)
+  
+  yn
+}
+
 # Tests
 # t1 = "TcdA"
 # t2 = "TcdA OR TcdB"
@@ -14,7 +27,12 @@
 # are linked with booleans which are also returned
 parse_comp_str = function( comp.string ) {
   # get string between each boolean operator
-  comps = strsplit( comp.string, "\\s*(\\||\\&)\\s*" )[[1]]
+  sp = "[[:space:]]*"
+  pattern = paste0(sp,"[[:alnum:]\\-\\.\\_]+",sp,
+                   "\\[*",sp,"[[:digit:][:space:]-]*","\\]*",sp)
+  matches = str_match_all(comp.string, pattern)[[1]]
+  comps = gsub("[[:space:]]","",matches)
+  comps
   
   # split the names and concenctrations of each string
   comp = lapply( comps, function(x) strsplit(x,"\\s*\\[\\s*")[[1]])
@@ -37,64 +55,45 @@ parse_comp_str = function( comp.string ) {
   bounds.df$left[is.na(bounds.df$left)] = -Inf
   bounds.df$right[is.na(bounds.df$right)] = Inf
   
-  # get the booleans separating compound strings
-  matches = gregexpr( "(\\||\\&)", comp.string )[[1]]
-  match.length = attributes(matches)$match.length
-  bools = sapply(match.length, function(x) if(x==3) "AND" else if(x==2) "OR" else NA_character_ )
+  return( bounds.df )
+}
+
+# Take a concentration string (s) and the results
+# from parse_comp_str (bounds) to to see if the string
+# is selecting a well
+match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
+
+  out = logical(nrow(bounds))
+  sn = solution(well,ID=ID)
   
-  return( list( bounds=bounds.df, bools=bools) )
-}
-
-IDw = "last"
-
-subset = select(wells,file="HCT8-t3.txt")
-s = "TcdA[1-10] | TcdB[1] | gdTcdB[10-100]"
-limits = parse_comp_str(s)
-bounds = limits$bounds
-
-out = logical(nrow(bounds))
-
-well = subset[[1]]
-sn = solution(well,ID=IDw)
-
-# figure out which part of the bounds are satisfied
-# in the solution
-for( i in 1:nrow(bounds) ) {
-  nm = bounds$name[i]
-  if( nm %in% sn$compounds$name ) {
-    conc = sn$compounds[ sn$compounds$name==nm, "conc" ]
-    lbound = bounds$left[i]
-    rbound = bounds$right[i]
-    out[i] = conc >= lbound & conc <= rbound
-  } else {
-    out[i] = FALSE
+  # figure out which part of the bounds are satisfied
+  for( i in 1:nrow(bounds) ) {
+    nm = bounds$name[i]
+    if( nm %in% sn$compounds$name ) {
+      conc = sn$compounds[ sn$compounds$name==nm, "conc" ]
+      lbound = bounds$left[i]
+      rbound = bounds$right[i]
+      out[i] = conc >= lbound & conc <= rbound
+    } else {
+      out[i] = FALSE
+    }
   }
-}
-
-# do the boolean logic with the matched parts
-bools = limits$bools
-for( i in 1:length(bools) ) {
-  if( bools[i] == "OR" ) {
-    out[i+1] = out[i] | out[i+1]
-  } else if( bools[i] == "AND" ) {
-    
-  } else {
-    stop("unknown or no boolean operator")
+  
+  # Replace the compounds with the TRUE/FALSE if they matched the well
+  sp = "[[:space:]]*"
+  pattern = paste0(sp,"[[:alnum:]\\-\\.\\_]+",sp,
+                   "\\[*",sp,"[[:digit:][:space:]-]*","\\]*",sp)
+  notmatched = strsplit(s,pattern)[[1]]
+  if( length(notmatched)==length(out) ) {
+    eval.string = paste0(notmatched,out,collapse="")
+  } else if( length(notmatched)==length(out)+1) {
+    eval.string = paste0(notmatched[1],paste0(out,notmatched[-1],collapse=""),collapse="")
   }
-  out[i]
+  eval(parse(text=eval.string))
 }
 
 
 
-# select wells based off of the search.wellList function
-select = function(x, ...) UseMethod("select",x)
-select.wellList = function(wells, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)]
-}
-"select<-" = function(x, ...) UseMethod("select<-",x)
-"select<-.wellList" = function(wells, value, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)] = value
-  wells
-}
+
+
+

@@ -10,6 +10,7 @@ source("./Scripts3/Getset.R")
 source("./Scripts3/General.R")
 source("./Scripts3/Solutions.R")
 source("./Scripts3/Print.R")
+source("./Scripts3/Select.R")
 
 metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
 metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
@@ -31,7 +32,9 @@ select(wells)
 
 
 
-
+search(wells,compstr="HCT8")
+subset = select(wells,"(TcdB & gdTcdB) | ( TcdA & gdTcdB )")
+print(subset,printall=TRUE)
 select.wellList
 
 
