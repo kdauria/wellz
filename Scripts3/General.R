@@ -35,3 +35,30 @@ format1 = function(x) {
   }
   sapply(x,.local)
 }
+
+# Custom paste function that returns NA
+# if the input is NULL or if all inputs are NA
+# Removes all arguments that are NA (though doesn't
+# remove the argument if it is a vector that is not all NA's)
+# Also removes NULL arguments before the call to paste
+paste2 = function(...) {
+  args = list(...)
+  #print(args)
+  sep = args$sep
+  collapse = args$collapse
+  args$sep = NULL
+  args$collapse = NULL
+  
+  if( is.null(unlist(args)) ) {
+    return(NA)
+  } else {
+    args = lapply(args,function(x) if(!is.null(x) && length(x) && all(is.na(x))) NULL else x )
+    args = args[ !sapply(args,is.null) ]
+    
+    if( is.null(unlist(args)) ) return(NA)
+    newargs = c( args, sep=sep, collapse=collapse)
+    #print(newargs)
+    return( do.call(paste, newargs ))
+  }
+}
+

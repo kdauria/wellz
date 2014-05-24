@@ -29,7 +29,9 @@ c.wellList = function(x,...) {
 }
 
 
-####### access and set different elements of wells, wellLists, actions, and actionLists
+#############################################################
+#         Simple, fast accessors of well information        #
+#############################################################
 
 ## Different types of accessor functions:
 # code
@@ -38,7 +40,6 @@ c.wellList = function(x,...) {
 # solution
 # actionList
 # ID
-# compound_names
 # volume
 
 
@@ -141,15 +142,15 @@ solution.actionList = function(x,ID=NA) {
     if(ID=="last") {
       out = x[[length(x)]]$solution
     } else {
-      out = x[[ID]]$solution
+      out = x[[ID]]$solution # returns NULL if ID isn't in action list
     }
   } else {
     out = lapply(x,"[[","solution")
   }
   return(out)
 }
-solution.well = function(x,ID="last") solution(x$actions,ID)
-solution.wellList = function(x,ID="last") lapply(x,solution,ID)
+solution.well = function(x, ID="last") solution( actionList(x), ID)
+solution.wellList = function(x, ...) lapply(x,solution, ...)
 "solution<-" = function(x,value) UseMethod("solution<-",x)
 "solution<-.action" = function(x,value) x[["solution"]] = value
 "solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
@@ -167,6 +168,7 @@ actionList.wellList = function(x) lapply(x,"[[","actions")
 ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
 ID.actionList = function(x) vapply(x,"[[","","ID")
+ID.well = function(x) sapply(x$actions, ID)
 "ID<-" = function(x,value) UseMethod("ID<-",x)
 "ID<-.action" = function(x,value) x[["ID"]] = value
 "ID<-.actionList" = function(x,value) { 
@@ -175,8 +177,20 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
   x
 }
 
+######## "volume"
+volume = function(x,...) UseMethod("volume",x)
+volume.Solution = function(x) x$volume
+volume.well = function(x, ...) solution(x, ...)$volume
+volume.wellList = function(x, ...) sapply(x, volume, ...)
+
+
+###############################################################
+#                   More complex functions                    #
+###############################################################
+
 ######## "compound_names" of compounds in a solution, well, or wellList
 compound_names = function(x,...) UseMethod("compound_names",x)
+compound_names.default = function(x,...) return(NA)
 compound_names.Solution = function(x,type="all") {
   if( type=="all" ) {
     return( x$compounds$name )
@@ -184,21 +198,75 @@ compound_names.Solution = function(x,type="all") {
     return( x$compounds$name[ x$compounds$type==type ] )
   }  
 }
-compound_names.well = function(x,ID=length(x$actions),type="start") {
+compound_names.well = function(x, type="start", ...) {
   if( length(x$actions)==0 ) {
     return( "" )
   } else {
-    return(x$actions[[ID]]$solution$compounds$name[  
-      x$actions[[ID]]$solution$compounds$type %in% type] )
+    return( compound_names( solution(x, ...), type=type ) )
   }
 }
-compound_names.wellList = function(x,...) {
-  unique(unlist(lapply(x,compound_names,...)))
+# unique=TRUE means that only the unique compounds are returned
+# unique=FALSE means that the compounds for each well are returned in a vector
+#    the same length as the wellList
+# collapse=TRUE means that 2+-compound wells are concatenated into one string
+# collapse=FASE means that compounds are not concatenated into one string
+# NA is returned if an action with ID (see compound_names.well and solution)
+# does not exist
+compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
+  nms = lapply(x, compound_names, ...)
+  if( !collapse & !unique ) {
+    out = nms
+  } else if( !collapse & unique ) {
+    out = unique(unlist(nms))
+  } else if (collapse & !unique) {
+    out = sapply( nms, paste2, collapse="+" ) # NOTE paste2, not paste
+  } else if (collapse & unique) {
+    out = paste2( na.omit(unique(unlist(nms))), collapse=", " )
+  }
+  return(out)
 }
 
-######## "volume"
-volume = function(x,...) UseMethod("volume",x)
-volume.Solution = function(x) x$
+######## "concentration" of a well, wellList
+concentration = function(x,...) UseMethod("concentration", x)
+concentration.well = function(x, compound=NULL, type="start", ... ) {
+  
+  soln = solution(x, ... )
+  if(is.null(soln)) return(NA)
+  
+  if( !is.null(compound) && length(compound)==1 ) {
+    out = soln$compounds[ soln$compounds$name==compound, "conc" ]
+    if(length(out)==0) out = 0
+    return(out)
+  }
+  if( is.null(compound) ) compound = compound_names( soln, type=type )
+  
+  comp.rows = soln$compounds[ soln$compounds$name %in% compound, ]
+  out = paste(comp.rows$name, format1(comp.rows$conc), sep="-", collapse=", ")
+  return(out)
+}
+concentration.wellList = function(x, compound=NULL, type="start", ... ) {
+  
+  if(is.null(compound)) {
+    nms = compound_names(wells, collapse=FALSE, type=type)
+    if( length(unique(nms))==1 ) compound = nms
+  }
+  sapply( x, concentration, compound=compound, type=type, ... )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

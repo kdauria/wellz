@@ -9,7 +9,7 @@
 # can be put into a vector. A further description
 # of each is provided after the list.
 # 1. file
-# 2. locaton
+# 2. location
 # 3. concentration
 # 4. concentration
 # 5. concentration.start
@@ -21,11 +21,18 @@
 # 11. compound.all
 # 12. solvent
 # 13. solvent.percentages
+# 14. volume
 
 
 # These two are self-explanatory
 # file
 # location
+
+# For volume, each well has different volumes at different
+# points. Therefore, and ID must be input to indicate
+# at which point the volume is requested. If it is not
+# given, then the volume of the final solution is given.
+# volume
 
 # The numeric values can only be given if there
 # is only one compound in all wells. Otherwise
@@ -38,9 +45,8 @@
 # "compound-conc" strings will be concatenated with a comma delimiter
 
 # concentration
-# concentration.start
-# concentration.total
-# concentration.all
+# + type: "start", "all", "total"
+# + name: NULL or character
 
 # There are two types of concentrations: "start" which
 # means that this is a typical way that concentration is reported,
@@ -54,10 +60,8 @@
 # then the output is a logical indicating if the compound is in the well
 
 # compound
-# compound.start
-# compound.total
-# compound.all
-
+# + type: "start", "all", "total"
+# + name: NULL or character
 
 # if multiple solvents, their names are concatenated
 # like with concentrations, numeric values are only given
@@ -67,7 +71,25 @@
 # solvent
 # solvent.percentages
 
-
+group = function(x,...) UseMethod("group",x)
+group.wellList = function(x, by="location", type="start", ID="last", compound=NULL ) {
+  
+  if( by == "location" ) {
+    out = code(x)
+  } else if( by == "file" ) {
+    out = filename(x)
+  } else if( by == "volume") {
+    out = volume(x)
+  } else if( by == "compound" && is.null(compound) ) {
+    out = compound_names(x, unique=FALSE, type=type, ID=ID )
+  } else if( by=="compound" && !is.null(compound) ) {
+    comps = compound_names(x, unique=FALSE, collapse=FALSE, type=type, ID=ID)
+    out = sapply(comps, function(x) if(length(x)==1 && is.na(x)) NA else compound %in% x )
+  } else if( by =="concentration" ) {
+    out = concentration(x, type=type, ID=ID, compound=compound)
+  }
+  return(out)
+}
 
 
 
