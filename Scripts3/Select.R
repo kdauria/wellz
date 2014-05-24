@@ -1,12 +1,15 @@
 #### Find wells that match the requested parameters
 search = function(x,...) UseMethod("search",x)
-search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL) {
+search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL,ID="last") {
   
   # filename & code
   yn = rep(TRUE,length(wells))
   if(!is.null(filename)) yn = yn & filename(wells) %in% filename
   if(!is.null(code)) yn = yn & code(wells) %in% code
-  if(!is.null(compstr)) yn = yn & sapply(wells, match_well_string, compstr)
+  if(!is.null(compstr)) {
+    bounds = parse_comp_str( compstr )
+    yn = yn & sapply(wells, match_well_string, compstr, bounds, ID)
+  }
   
   yn
 }
@@ -23,8 +26,7 @@ search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL) {
 # t9 = "TcdA AND TcdB OR IL8"
 
 # Parses a concentration string and returns a list
-# with the names and bounds of each compound. They
-# are linked with booleans which are also returned
+# with the names and bounds of each compound.
 parse_comp_str = function( comp.string ) {
   # get string between each boolean operator
   sp = "[[:space:]]*"
@@ -60,7 +62,7 @@ parse_comp_str = function( comp.string ) {
 
 # Take a concentration string (s) and the results
 # from parse_comp_str (bounds) to to see if the string
-# is selecting a well
+# is selecting the well
 match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
 
   out = logical(nrow(bounds))

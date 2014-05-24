@@ -30,6 +30,19 @@ c.wellList = function(x,...) {
 
 
 ####### access and set different elements of wells, wellLists, actions, and actionLists
+
+## Different types of accessor functions:
+# code
+# filename
+# index
+# solution
+# actionList
+# ID
+# compound_names
+# volume
+
+
+##### "code" or "location"
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]
 code.wellList = function(x) code_rcpp(x)
@@ -59,7 +72,7 @@ cppFunction('
             out.attr("class") = x.attr("class");
             return out;  }')
 
-
+######### "file" or "filename"
 filename = function(x) UseMethod("filename",x)
 filename.well = function(x) x[["file"]]
 filename.wellList = function(x) filename_rcpp(x)
@@ -89,7 +102,7 @@ cppFunction('
             out.attr("class") = x.attr("class");
             return out;  }')
 
-
+####### "index# or "time" of an action
 index = function(x) UseMethod("index",x)
 index.action = function(x) x[["i"]]
 index.actionList = function(x) index_actionList_rcpp(x)
@@ -120,7 +133,7 @@ cppFunction('
             out.attr("class") = x.attr("class");
             return out;  }')
 
-
+######### "solution"
 solution = function(x,...) UseMethod("solution",x)
 solution.action = function(x) x[["solution"]]
 solution.actionList = function(x,ID=NA) {
@@ -142,12 +155,15 @@ solution.wellList = function(x,ID="last") lapply(x,solution,ID)
 "solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
 "solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
 
+########## "actionList"
 actionList = function(x) UseMethod("actionList",x)
 actionList.well = function(x) x$actions
 actionList.wellList = function(x) lapply(x,"[[","actions")
 "actionList<-" = function(x,value) UseMethod("actionList<-",x)
 "actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 
+
+######### "ID" of actions
 ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
 ID.actionList = function(x) vapply(x,"[[","","ID")
@@ -159,6 +175,7 @@ ID.actionList = function(x) vapply(x,"[[","","ID")
   x
 }
 
+######## "compound_names" of compounds in a solution, well, or wellList
 compound_names = function(x,...) UseMethod("compound_names",x)
 compound_names.Solution = function(x,type="all") {
   if( type=="all" ) {
@@ -178,6 +195,13 @@ compound_names.well = function(x,ID=length(x$actions),type="start") {
 compound_names.wellList = function(x,...) {
   unique(unlist(lapply(x,compound_names,...)))
 }
+
+######## "volume"
+volume = function(x,...) UseMethod("volume",x)
+volume.Solution = function(x) x$
+
+
+
 
 
 
