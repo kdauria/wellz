@@ -189,22 +189,6 @@ volume.wellList = function(x, ...) sapply(x, volume, ...)
 ###############################################################
 
 ######## "compound_names" of compounds in a solution, well, or wellList
-compound_names = function(x,...) UseMethod("compound_names",x)
-compound_names.default = function(x,...) return(NA)
-compound_names.Solution = function(x,type="all") {
-  if( type=="all" ) {
-    return( x$compounds$name )
-  } else {
-    return( x$compounds$name[ x$compounds$type==type ] )
-  }  
-}
-compound_names.well = function(x, type="start", ...) {
-  if( length(x$actions)==0 ) {
-    return( "" )
-  } else {
-    return( compound_names( solution(x, ...), type=type ) )
-  }
-}
 # unique=TRUE means that only the unique compounds are returned
 # unique=FALSE means that the compounds for each well are returned in a vector
 #    the same length as the wellList
@@ -212,15 +196,45 @@ compound_names.well = function(x, type="start", ...) {
 # collapse=FASE means that compounds are not concatenated into one string
 # NA is returned if an action with ID (see compound_names.well and solution)
 # does not exist
-compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
-  nms = lapply(x, compound_names, ...)
-  if( !collapse & !unique ) {
+compound_names = function(x,...) UseMethod("compound_names",x)
+compound_names.default = function(x,...) return(NA)
+compound_names.Solution = function(x, type="all", compound=NULL) {
+  
+  if( type=="all" ) {
+    nms = x$compound$name
+  } else {
+    nms = x$compounds$name[ x$compounds$type==type ]
+  }
+  
+  if(is.null(compound)) {
     out = nms
-  } else if( !collapse & unique ) {
+  } else {
+    out = compound %in% nms
+  }
+  
+  return(out)
+}
+compound_names.well = function(x, type="start", compound=NULL, ...) {
+  compound_names( solution(x, ...), type=type, compound=compound )
+}
+compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, compound=NULL, ...) {
+  nms = lapply(x, compound_names, compound=compound, ...)
+  
+  # if the presence of a specific compound is requrested
+  if( !is.null(compound) && !unique ) {
+    return( unlist(nms) )
+  } else if( !is.null(compound) ) {
+    return( any(unlist(nms)) )
+  }
+  
+  # if a compound isn't requested
+  if( !collapse && !unique ) {
+    out = nms
+  } else if( !collapse && unique ) {
     out = unique(unlist(nms))
-  } else if (collapse & !unique) {
+  } else if (collapse && !unique) {
     out = sapply( nms, paste2, collapse="+" ) # NOTE paste2, not paste
-  } else if (collapse & unique) {
+  } else if (collapse && unique) {
     out = paste2( na.omit(unique(unlist(nms))), collapse=", " )
   }
   return(out)
@@ -228,34 +242,49 @@ compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
 
 ######## "concentration" of a well, wellList
 concentration = function(x,...) UseMethod("concentration", x)
-concentration.well = function(x, compound=NULL, type="start", ... ) {
+concentration.default = function(x, ...) return(NA)
+concentration.Solution = function( x, compound=NULL, type="start" ) {
   
-  soln = solution(x, ... )
-  if(is.null(soln)) return(NA)
-  
-  if( !is.null(compound) && length(compound)==1 ) {
-    out = soln$compounds[ soln$compounds$name==compound, "conc" ]
+  # if the concentration for a single compound is requested, return a numeric
+  if( !is.null(compound) && (class(compound)!="character" || length(compound)!=1))
+    stop( "compound argument must be character class of length 1" )
+  if( !is.null(compound) ) {
+    out = x$compounds[ x$compounds$name==compound, "conc" ]
     if(length(out)==0) out = 0
     return(out)
   }
-  if( is.null(compound) ) compound = compound_names( soln, type=type )
   
-  comp.rows = soln$compounds[ soln$compounds$name %in% compound, ]
+  # Otherwise get compound names to return
+  compound = compound_names( x, type=type )
+  comp.rows = x$compounds[ x$compounds$name %in% compound, ]
   out = paste(comp.rows$name, format1(comp.rows$conc), sep="-", collapse=", ")
   return(out)
 }
+concentration.well = function(x, compound=NULL, type="start", ... ) {
+  concentration(solution(x, ... ), type=type, compound=compound )
+}
 concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   
+  # return a numeric if there is only one compound in all columns
   if(is.null(compound)) {
-    nms = compound_names(wells, collapse=FALSE, type=type)
+    nms = compound_names(x, collapse=FALSE, type=type)
     if( length(unique(nms))==1 ) compound = nms
   }
+  
+  # Otherwise, return strings concatenating name and numeric
   sapply( x, concentration, compound=compound, type=type, ... )
 }
 
 
+##### "solvent_names"
+solvent_names = function(x,...) UseMethod("solvent_names",x)
+solvent_names.default = function(x,...) return(NA)
+solvent_names.Solution = function(x, ...) x$solvent$name
+solvent_names.well = function(x, ... ) solvent_names(solution(x, ...))
 
-
+solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE) {
+  
+}
 
 
 

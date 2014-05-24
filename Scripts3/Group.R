@@ -80,13 +80,12 @@ group.wellList = function(x, by="location", type="start", ID="last", compound=NU
     out = filename(x)
   } else if( by == "volume") {
     out = volume(x)
-  } else if( by == "compound" && is.null(compound) ) {
-    out = compound_names(x, unique=FALSE, type=type, ID=ID )
-  } else if( by=="compound" && !is.null(compound) ) {
-    comps = compound_names(x, unique=FALSE, collapse=FALSE, type=type, ID=ID)
-    out = sapply(comps, function(x) if(length(x)==1 && is.na(x)) NA else compound %in% x )
+  } else if( by == "compound" ) {
+    out = compound_names(x, unique=FALSE, type=type, ID=ID, compound=compound )
   } else if( by =="concentration" ) {
     out = concentration(x, type=type, ID=ID, compound=compound)
+  } else if( by =="solvent" ) {
+    
   }
   return(out)
 }
