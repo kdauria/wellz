@@ -62,3 +62,26 @@ paste2 = function(...) {
   }
 }
 
+# A very specific function, but one I use more than once
+# This takes a list of character vectors
+# unique=TRUE means that only the unique characters are returned
+# unique=FALSE means that the characters for each list element are returned in a vector
+#    the same length as the list
+# collapse=TRUE means that 2+-character list elements are concatenated into one string
+# collapse=FASE means that a list of character vectors is returned
+list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
+  if( !collapse && !unique ) {
+    out = nms
+  } else if( !collapse && unique ) {
+    out = unique(unlist(nms))
+  } else if (collapse && !unique) {
+    out = sapply( nms, paste2, collapse="+" ) # NOTE paste2, not paste
+  } else if (collapse && unique) {
+    out = paste2( na.omit(unique(unlist(nms))), collapse=", " )
+  }
+  return(out)
+}
+
+
+
+

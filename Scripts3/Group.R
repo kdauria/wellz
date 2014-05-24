@@ -11,17 +11,10 @@
 # 1. file
 # 2. location
 # 3. concentration
-# 4. concentration
-# 5. concentration.start
-# 6. concentration.total
-# 7. concentration.all
-# 8. compound
-# 9. compound.start
-# 10. compound.total
-# 11. compound.all
-# 12. solvent
-# 13. solvent.percentages
-# 14. volume
+# 4. compound
+# 5. solvent
+# 6. solvent.percentages
+# 7. volume
 
 
 # These two are self-explanatory
@@ -72,22 +65,17 @@
 # solvent.percentages
 
 group = function(x,...) UseMethod("group",x)
-group.wellList = function(x, by="location", type="start", ID="last", compound=NULL ) {
+group.wellList = function(x, by="location", ID="last", 
+                          type="start", compound=NULL, solvent=NULL ) {
   
-  if( by == "location" ) {
-    out = code(x)
-  } else if( by == "file" ) {
-    out = filename(x)
-  } else if( by == "volume") {
-    out = volume(x)
-  } else if( by == "compound" ) {
-    out = compound_names(x, unique=FALSE, type=type, ID=ID, compound=compound )
-  } else if( by =="concentration" ) {
-    out = concentration(x, type=type, ID=ID, compound=compound)
-  } else if( by =="solvent" ) {
-    
-  }
-  return(out)
+  switch( by,
+          location = code(x),
+          file == filename(x),
+          volume = volume(x),
+          compound = compound_names(x, unique=FALSE, type=type, ID=ID ),
+          concentration = concentration(x, type=type, ID=ID, compound=compound ),
+          solvent = solvent_names( x, ID=ID, unique=FALSE ),
+          solvent.percentages = solvent_percentages( x, ID=ID, solvent=solvent) )
 }
 
 

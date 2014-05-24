@@ -10,7 +10,6 @@ search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL,ID="last")
     bounds = parse_comp_str( compstr )
     yn = yn & sapply(wells, match_well_string, compstr, bounds, ID)
   }
-  
   yn
 }
 

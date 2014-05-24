@@ -188,55 +188,35 @@ volume.wellList = function(x, ...) sapply(x, volume, ...)
 #                   More complex functions                    #
 ###############################################################
 
+##### "solvent_names"
+solvent_names = function(x,...) UseMethod("solvent_names",x)
+solvent_names.default = function(x,...) return(NA)
+solvent_names.Solution = function(x, ...) x$solvent$name
+solvent_names.well = function(x, ... ) solvent_names(solution(x, ...))
+solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
+  nms = lapply(x, solvent_names, ...)
+  out = list_concat_str( nms, unique=unique, collapse=collapse )
+  return(out)
+}
+
 ######## "compound_names" of compounds in a solution, well, or wellList
-# unique=TRUE means that only the unique compounds are returned
-# unique=FALSE means that the compounds for each well are returned in a vector
-#    the same length as the wellList
-# collapse=TRUE means that 2+-compound wells are concatenated into one string
-# collapse=FASE means that compounds are not concatenated into one string
 # NA is returned if an action with ID (see compound_names.well and solution)
 # does not exist
 compound_names = function(x,...) UseMethod("compound_names",x)
 compound_names.default = function(x,...) return(NA)
-compound_names.Solution = function(x, type="all", compound=NULL) {
-  
+compound_names.Solution = function(x, type="all" ) {
   if( type=="all" ) {
-    nms = x$compound$name
+    return( x$compound$name )
   } else {
-    nms = x$compounds$name[ x$compounds$type==type ]
+    return( x$compounds$name[ x$compounds$type==type ] )
   }
-  
-  if(is.null(compound)) {
-    out = nms
-  } else {
-    out = compound %in% nms
-  }
-  
-  return(out)
 }
-compound_names.well = function(x, type="start", compound=NULL, ...) {
-  compound_names( solution(x, ...), type=type, compound=compound )
+compound_names.well = function(x, type="start", ...) {
+  compound_names( solution(x, ...), type=type )
 }
-compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, compound=NULL, ...) {
-  nms = lapply(x, compound_names, compound=compound, ...)
-  
-  # if the presence of a specific compound is requrested
-  if( !is.null(compound) && !unique ) {
-    return( unlist(nms) )
-  } else if( !is.null(compound) ) {
-    return( any(unlist(nms)) )
-  }
-  
-  # if a compound isn't requested
-  if( !collapse && !unique ) {
-    out = nms
-  } else if( !collapse && unique ) {
-    out = unique(unlist(nms))
-  } else if (collapse && !unique) {
-    out = sapply( nms, paste2, collapse="+" ) # NOTE paste2, not paste
-  } else if (collapse && unique) {
-    out = paste2( na.omit(unique(unlist(nms))), collapse=", " )
-  }
+compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
+  nms = lapply(x, compound_names, ...)
+  out = list_concat_str(nms, unique=unique, collapse=collapse)
   return(out)
 }
 
@@ -265,25 +245,42 @@ concentration.well = function(x, compound=NULL, type="start", ... ) {
 }
 concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   
-  # return a numeric if there is only one compound in all columns
+  # make sure a numeric is returned if there is only one compound in all wells
   if(is.null(compound)) {
     nms = compound_names(x, collapse=FALSE, type=type)
     if( length(unique(nms))==1 ) compound = nms
   }
-  
-  # Otherwise, return strings concatenating name and numeric
   sapply( x, concentration, compound=compound, type=type, ... )
 }
 
 
-##### "solvent_names"
-solvent_names = function(x,...) UseMethod("solvent_names",x)
-solvent_names.default = function(x,...) return(NA)
-solvent_names.Solution = function(x, ...) x$solvent$name
-solvent_names.well = function(x, ... ) solvent_names(solution(x, ...))
-
-solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE) {
+solvent_percentages = function(x, ...) UseMethod("solvent_percentages",x)
+solvent_percentages.default = function(x, ...) return(NA)
+solvent_percentages.Solution = function(x, solvent=NULL, ...) {
   
+  # if the percentage for a single solvent is requested, return a numeric
+  if( !is.null(solvent) && (class(solvent)!="character" || length(solvent)!=1))
+    stop( "solvent argument must be character class of length 1" )
+  if( !is.null(solvent) ) {
+    out = x$solvent[ x$solvent$name==solvent, "perc" ]
+    if(length(out)==0) out = 0
+    return(out)
+  }
+  
+  out = paste( x$solvent$name, format1(x$solvent$perc), sep="-", collapse=", ")
+  return(out)
+}
+solvent_percentages.well = function(x, solvent=NULL, ... ) {
+  solvent_percentages( solution(x,...), solvent=solvent )
+}
+solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
+  
+  # make sure a numeric is returned if there is only one solvent in all wells
+  if(is.null(solvent)) {
+    nms = compound_names(x, collapse=FALSE, type=type)
+    if( length(unique(nms))==1 ) solvent = nms
+  }
+  sapply( x, solvent_percentages, solvent=solvent, ... )
 }
 
 
