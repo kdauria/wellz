@@ -82,6 +82,12 @@ list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
   return(out)
 }
 
+# Checks if something is a character of length 1
+is_char_len1 = function(x) is.character(x) && length(x)==1
+
+
+
+
 
 
 

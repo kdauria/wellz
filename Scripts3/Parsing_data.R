@@ -22,7 +22,8 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
         next
       }
       well.ij = which( files[i] == r$file & codes.i[j] == r$code )
-      wells[[well.ij]]$data = dat[,c("i","t",codes.i[j])]
+      wells[[well.ij]]$data = dat[ , c("i","t",codes.i[j]), with=FALSE]
+      setnames(wells[[well.ij]]$data, c("i","t","value"))
     }
   }
   wells
@@ -37,7 +38,7 @@ parse_rtca = function(filepath) {
     cn[ii] = paste0( substr(cn[ii],4,5) )
   cn[1] = "t"
   setnames(dat,cn)
-  class(dat) = "data.frame"
+  #class(dat) = "data.frame"
   dat
 }
 

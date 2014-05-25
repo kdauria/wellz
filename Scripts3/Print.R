@@ -1,6 +1,11 @@
 print.wellList = function( wells, printall=FALSE, ID="last" ) {
   
   files = filename(wells)
+  if(length(wells)==0) {
+    cat("Empty wellList\n")
+    return()
+  }
+  
   if( unique(files)==1 || length(wells)<33 || printall ) {
     
     # get information for every single well in a data.frame
@@ -44,7 +49,8 @@ print.well = function( well ) {
   
   if(length(well$data)!=0) {
     cat("\n\n")
-    print_well_data(well$data)
+    #print_well_data(well$data)
+    print(well$data)
   }
 }
 

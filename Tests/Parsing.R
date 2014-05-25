@@ -21,6 +21,7 @@ wells = parse_metadata(metadata,data.dir,parse_rtca)
 
 
 
+
 search(wells,compstr="HCT8")
 subset = select(wells,"(TcdB[10] & gdTcdB) | ( TcdA[10] & gdTcdB )")
 subset = select(wells,"(TcdB[10] | TcdA[10]) & gdTcdB")
