@@ -21,7 +21,7 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
         warning(paste("Well",codes.i[j],"not in file",files[i]))
         next
       }
-      well.ij = which( files[i] == r$file & codes.i[j] == r$code )
+      well.ij = which( files[i] == r$file & codes.i[j] == r$location )
       wells[[well.ij]]$data = dat[ , c("i","t",codes.i[j]), with=FALSE]
       setnames(wells[[well.ij]]$data, c("i","t","value"))
     }

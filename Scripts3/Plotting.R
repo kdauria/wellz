@@ -14,30 +14,21 @@
 # shape
 # size
 
+# Note error here is the gray values that are because of NA values
+# Should throw an error here and remove them from the plot
+# That's not really possible actually. It should be done at the select stage
+x = select(wells,file="HCT8.txt")[1:4]
+x = select(wells,file="HCT8.txt", ID="toxinAdd")
 
 
-mplot = function( x, ..., ID="last", type="start", compound=NULL, solvent=NULL ) {
+ggplot(x, color="concentration") + geom_point() + geom_line()
+
+ggplot.wellList = function( x, ... ) {
   
-  poss.aethetics = c("color","linetype","size","alpha","shape","fill")
-  
-  args = list( color="concentration", size=1:7 )
-  if( !all(names(args) %in% poss.aethetics) )
-    stop( paste("plot parameters must be one of", paste(poss.aethetics,collapse=" ") ) )
-  
-  # change the single character inputs to vectors
-  
+  maes = well_aes(x, ...)
+  maes$group = quote(interaction(file,location))
+  dat = melt_wellList_params(x, ...)
+  ggplot(dat, maes)
   
 }
-
-
-x = select(wells,"TcdA",filename="HCT8.txt", ID="toxinAdd")
-
-# melt_wellList_params(x, "volume", "file", "concentration", 
-#                      manual.params=list(aa=1:7,bb=2:8), ID="toxinAdd")
-
-
-
-
-
-
 

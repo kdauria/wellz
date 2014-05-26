@@ -13,7 +13,7 @@ select.wellList = function(wells, ...) {
 }
 
 roster = function(wells) {
-  data.frame( file=filename(wells), code=code(wells) ) 
+  data.frame( file=filename(wells), location=code(wells) ) 
 }
 
 # Don't lose class when subsetting
@@ -169,6 +169,7 @@ ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
 ID.actionList = function(x) vapply(x,"[[","","ID")
 ID.well = function(x) sapply(x$actions, ID)
+ID.wellList = function(x) lapply(x,ID)
 "ID<-" = function(x,value) UseMethod("ID<-",x)
 "ID<-.action" = function(x,value) x[["ID"]] = value
 "ID<-.actionList" = function(x,value) { 

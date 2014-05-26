@@ -6,12 +6,14 @@ search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL,ID="last")
   yn = rep(TRUE,length(wells))
   if(!is.null(filename)) yn = yn & filename(wells) %in% filename
   if(!is.null(code)) yn = yn & code(wells) %in% code
+  if(ID!="last") yn = yn & sapply( ID(wells), function(x) ID %in% x )
   if(!is.null(compstr)) {
     bounds = parse_comp_str( compstr )
     yn = yn & sapply(wells, match_well_string, compstr, bounds, ID)
   }
   yn
 }
+
 
 # Tests
 # t1 = "TcdA"
