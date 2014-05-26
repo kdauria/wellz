@@ -3,6 +3,7 @@ library(stringr)
 library(plyr)
 library(data.table)
 library(Rcpp)
+library(ggplot2)
 source("./Scripts3/Parsing.R")
 source("./Scripts3/Parsing_expand.R")
 source("./Scripts3/Parsing_data.R")
@@ -11,6 +12,8 @@ source("./Scripts3/General.R")
 source("./Scripts3/Solutions.R")
 source("./Scripts3/Print.R")
 source("./Scripts3/Select.R")
+source("./Scripts3/Melt.R")
+source("./Scripts3/Group.R")
 
 metadata = "./Tests/LoadingData/OneExperiment-Correct.csv"
 metadata = "./Tests/LoadingData/MultipleCompoundSolution.csv"
@@ -18,8 +21,6 @@ metadata = "./MasterSheet.csv"
 data.dir = "./Data/"
 
 wells = parse_metadata(metadata,data.dir,parse_rtca)
-
-
 
 
 search(wells,compstr="HCT8")

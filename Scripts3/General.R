@@ -71,13 +71,13 @@ paste2 = function(...) {
 # collapse=FASE means that a list of character vectors is returned
 list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
   if( !collapse && !unique ) {
-    out = nms
+    out = l
   } else if( !collapse && unique ) {
-    out = unique(unlist(nms))
+    out = unique(unlist(l))
   } else if (collapse && !unique) {
-    out = sapply( nms, paste2, collapse="+" ) # NOTE paste2, not paste
+    out = sapply( l, paste2, collapse="+" ) # NOTE paste2, not paste
   } else if (collapse && unique) {
-    out = paste2( na.omit(unique(unlist(nms))), collapse=", " )
+    out = paste2( na.omit(unique(unlist(l))), collapse=", " )
   }
   return(out)
 }
