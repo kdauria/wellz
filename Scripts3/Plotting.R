@@ -24,7 +24,7 @@ x = select(wells,file="HCT8.txt", ID="toxinAdd")
 ggplot(x, color="concentration", diagnostic=1) + geom_line()
 
 a = plot(x, color="concentration", diagnostic=1, ID="toxinAdd", type="all")
-a = plot(x, diagnostic=3, xlim=c(40,60))
+a = plot(x, diagnostic=3, xlim=c(45,55), points=TRUE, color="concentration")
 
 # The ... possibilities are:
 #  type, ID, compound, solvent AND plot parameters
@@ -44,12 +44,14 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, line
   title = add_title( x, args, diagnostic )
   points = if(points) geom_point() else NULL
   lines = if(lines) geom_line() else NULL
-  text = if(!is.null(diagnostic)) NULL
+  text = if(!is.null(diagnostic)) diagnostic_lines(base.plot, diagnostic) else NULL
   
-  return(base.plot + title + lines + points)
+  return(base.plot + title + lines + points + text)
   
 }
 
+# Add lines and text showing the 'i' (index) of each
+# data point from the original data
 diagnostic_lines = function( p, diagnostic ) {
   
   # Find the location of ticks and the range of the plot
@@ -64,51 +66,10 @@ diagnostic_lines = function( p, diagnostic ) {
   ticks.i = vapply( ticks, function(x) which.min(abs(x-p$data$t)), 1)
   subdata = p$data[ticks.i,]
   
-  out1 = annotation_custom( textGrob( subdata$i, x=(subdata$t - xlim[1])/diff(xlim), y=1, vjust=1),
-                            xmin=xlim[1], xmax=xlim[2], ymin=ylim[1], ymax=ylim[2]*1.01)
-  #out1 = geom_text(data=subdat, aes(x=t,label=i), y=ylim[2], alpha=1)
-  out2 = geom_linerange(data=subdata, aes(x=t,ymin=value+diff(ylim)*0.01), ymax=ylim[2]*0.95, alpha=1)
+  out1 = geom_text(data=subdata, aes(x=t,label=i), y=ylim[2], alpha=1, vjust=1, color="gray50")
+  out2 = geom_linerange(data=subdata, aes(x=t,ymin=value+diff(ylim)*0.01), ymax=ylim[2]*0.95, alpha=1, color="gray50")
   list(out1, out2)
 }
-
-
-
-add.text.times = function(p,dwell) {
-  
-  # the additional labels for the x-axis
-  times = timesdata(dwell)
-  sweeps = sweepdata(dwell)
-  
-  # find which sweep is closest to minor ticks
-  aa = ggplot_build(p)
-  majorx.times = aa$panel$ranges[[1]]$x.minor_source
-  foo = function(x) which.min(abs(x - times))
-  sweep.idxs = vapply(majorx.times,foo,1)
-  
-  # make sure that the sweep number isn't NA
-  sn = na.omit(sweeps)
-  for( i in seq_along(sweep.idxs) ) {
-    id = sweep.idxs[i]
-    sweepnum = sn[ which.min( abs(which(!is.na(sweeps))-id ) ) ]
-    sweep.idxs[i] = which( sweeps==sweepnum )
-  }
-  
-  # the sweep numbers as text on the plot
-  xloc = times[sweep.idxs]
-  max.y = aa$panel$y_scales[[1]]$range$range[2]
-  textdf = data.frame(x=xloc,y=max.y,label=as.character(sweeps[sweep.idxs]))
-  l1 = geom_text(mapping=aes(x=x,y=y,label=label),data=textdf,alpha=1)
-  
-  # vertial lines pointing to the sweep numbers
-  yline = welldata(dwell)[sweep.idxs]
-  linedf = data.frame(x=xloc,ymin=yline*1.02,ymax=max.y*0.98)
-  l2 = geom_linerange(data=linedf,aes(x=x,ymin=ymin,ymax=ymax),alpha=1)
-  
-  return(p+l1+l2)
-}
-
-
-
 
 # Checks to see if a well should be highlighted
 # If it should, the plot arguments are changed
