@@ -31,18 +31,12 @@ subset = select(wells,"(TcdB[10] & gdTcdB) | ( TcdA[10] & gdTcdB )", controls=TR
 subset = select(wells,"(TcdB[10] | TcdA[10]) & gdTcdB")
 subset = select(wells,"(TcdB[10] | TcdA[10]) & !gdTcdB & !PMN")
 
-# practice with replicates
-x = select(wells,"TcdA",filename="CecalCells.txt", controls=TRUE)
-x = c(x,x)
-code(x) = as.character(1:34)
 
-plot(x, xlim=c(33,40), color="concentration")
+x = select(wells,"HUVEC")
+plot(x, xlim=c(90,100), color="concentration", replicates=TRUE)
 
-
-
-
-
-
+newx = average_replicates(x)
+a = plot(newx, xlim=c(90,100), sd=TRUE, diagnostic=2, points=TRUE, color="concentration")
 
 
 

@@ -30,10 +30,13 @@
 
 # The ... possibilities are:
 #  type, ID, compound, solvent AND plot parameters
-plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, discrete=TRUE ) {
+plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
+                          points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates ) {
+  
+  if(replicates) x = average_replicates(x)
   
   args = list(...)
-  args = highlight_well( args, diagnostic )
+  args = highlight_well( x, args, diagnostic )
   args = arg_defaults( args )
   
   maes = do.call( well_aes, c(list(x),args) )
@@ -46,10 +49,21 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, disc
   if(discrete) make_discrete( base.plot, maes )
   title = add_title( x, args, diagnostic )
   points = if(points) geom_point() else NULL
-  text = if(!is.null(diagnostic)) diagnostic_lines(base.plot, diagnostic) else NULL
+  ribbon = sd_ribbon(maes, sd)
+  text = diagnostic_lines(x, base.plot+ribbon, diagnostic)
   
-  return(base.plot + title + points + text)
-  #return(data)
+  return(base.plot + title + points + text + ribbon)
+}
+
+# Whether or not to show errors from the replicate wells
+sd_ribbon = function(maes, sd) {
+  if(!sd) return(NULL)
+  
+  ribbon.aes = aes(ymin=value-sd,ymax=value+sd)
+  if( "colour" %in% names(maes) )
+    ribbon.aes$fill = maes$colour
+  
+  geom_ribbon(ribbon.aes, alpha=0.2, colour=NA)
 }
 
 # Make some of the plot parameters discrete if they
@@ -65,7 +79,9 @@ make_discrete = function( p, ast, discrete.params = c("colour","fill","size")) {
 
 # Add lines and text showing the 'i' (index) of each
 # data point from the original data
-diagnostic_lines = function( p, diagnostic ) {
+diagnostic_lines = function( x, p, diagnostic ) {
+  
+  if(is.null(diagnostic)) return(NULL)
   
   # Find the location of ticks and the range of the plot
   g = ggplot_build(p)
@@ -73,8 +89,8 @@ diagnostic_lines = function( p, diagnostic ) {
   ticks = g$panel$ranges[[1]]$x.minor_source
   
   # Find which 'i' are closest to the ticks
-  well.info = p$data[,list(file,location), by="file,location"][diagnostic]
-  p$data = p$data[well.info]
+  well.info = data.table( file=filename(x[[diagnostic]]), location=code(x[[diagnostic]]))
+  p$data = p$data[well.info] # a data.table JOIN
   ticks.i = vapply( ticks, function(x) which.min(abs(x-p$data$t)), 1)
   subdata = p$data[ticks.i,]
   
@@ -82,13 +98,14 @@ diagnostic_lines = function( p, diagnostic ) {
   subdata[ , ymin:=value+diff(g.ylim)*0.01 ]
   out2 = geom_linerange(data=subdata, aes(x=t,ymin=ymin), 
                         ymax=g.ylim[2]*0.95, alpha=1, color="gray50")
-  list(out1, out2)
+  out3 = scale_alpha(guide = 'none')
+  list(out1, out2, out3)
 }
 
 # Checks to see if a well should be highlighted
 # If it should, the plot arguments are changed
 # so that all other curves will have transparency
-highlight_well = function( args, diagnostic ) {
+highlight_well = function( x, args, diagnostic ) {
   if( !is.null(diagnostic)) {
     if("alpha" %in% names(args)) {
       stop("diagnostic doesn't work when alpha is already defined")

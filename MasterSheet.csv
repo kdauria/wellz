@@ -103,7 +103,7 @@ HCT8-t6.txt	A-H3-4	start	0	0	100	-	-	-
 	H3, G4					-	-	-	
 	A-H3-4	media1	2890	100	100	-	-	-	media
 HUVEC-r1.txt	A-H3-4	start	0	0	100	-	-	-	
-	A-H3-4	start	2	0	100	HUVEC	5000	total	
+	A-H3-4	cellSeed	2	0	100	HUVEC	5000	total	
 	A-H3-4	replaceMedia	1794	100	100	-	-	-	
 	D3-4	toxinAdd	1910	0	22.2	-	-	-	
 	A-C3, E-H3					TcdA	1000, 300, 100, 30, 10, 1, 0.1	final	
