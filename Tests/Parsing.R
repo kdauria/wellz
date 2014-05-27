@@ -38,5 +38,20 @@ plot(x, xlim=c(90,100), color="concentration", replicates=TRUE)
 newx = average_replicates(x)
 a = plot(newx, xlim=c(90,100), sd=TRUE, diagnostic=2, points=TRUE, color="concentration")
 
+######## Time centering a well
+
+tcenter = function(x,...) UseMethod("tcenter",x)
+tcenter.well = function(x, ID) {
+  
+  centered.time = ID_t(x, ID)
+  tdata(x) = tdata(x) - centered.time
+  x
+}
+
+x = wells[[1]]
+x2 = tcenter(x, "toxinAdd")
+
+plot(x)
+plot(tcenter(x,"toxinAdd") )
 
 

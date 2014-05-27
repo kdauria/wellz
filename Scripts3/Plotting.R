@@ -55,6 +55,10 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   return(base.plot + title + points + text + ribbon)
 }
 
+plot.well = function(x, ...) {
+  plot( structure( list(x), class=c("wellList","list") ), ...)
+}
+
 # Whether or not to show errors from the replicate wells
 sd_ribbon = function(maes, sd) {
   if(!sd) return(NULL)

@@ -28,6 +28,18 @@ c.wellList = function(x,...) {
   r
 }
 
+# Don't lose class when subsetting
+`[.actionList` = function( x, i ) {
+  r = NextMethod("[")
+  mostattributes(r) = attributes(x)
+  r
+}
+c.actionList= function(x,...) {
+  r = NextMethod("c")
+  mostattributes(r) = attributes(x)
+  r
+}
+
 
 #############################################################
 #         Simple, fast accessors of well information        #
@@ -134,35 +146,6 @@ cppFunction('
             out.attr("class") = x.attr("class");
             return out;  }')
 
-######### "solution"
-solution = function(x,...) UseMethod("solution",x)
-solution.action = function(x) x[["solution"]]
-solution.actionList = function(x,ID=NA) {
-  if(!is.na(ID)) {
-    if(ID=="last") {
-      out = x[[length(x)]]$solution
-    } else {
-      out = x[[ID]]$solution # returns NULL if ID isn't in action list
-    }
-  } else {
-    out = lapply(x,"[[","solution")
-  }
-  return(out)
-}
-solution.well = function(x, ID="last") solution( actionList(x), ID)
-solution.wellList = function(x, ...) lapply(x,solution, ...)
-"solution<-" = function(x,value) UseMethod("solution<-",x)
-"solution<-.action" = function(x,value) x[["solution"]] = value
-"solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
-"solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
-
-########## "actionList"
-actionList = function(x) UseMethod("actionList",x)
-actionList.well = function(x) x$actions
-actionList.wellList = function(x) lapply(x,"[[","actions")
-"actionList<-" = function(x,value) UseMethod("actionList<-",x)
-"actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
-
 
 ######### "ID" of actions
 ID = function(x) UseMethod("ID",x)
@@ -183,6 +166,91 @@ volume = function(x,...) UseMethod("volume",x)
 volume.Solution = function(x) x$volume
 volume.well = function(x, ...) solution(x, ...)$volume
 volume.wellList = function(x, ...) sapply(x, volume, ...)
+
+# Take the index for a data point and give the time value
+i_t = function(x, ...) UseMethod("i_t", x)
+i_t.default = function(x, ...) return(NA)
+i_t.well = function(x, i) wdata(x)$t[ match(i, wdata(x)$i) ]
+
+# Accessor to data of a well
+wdata = function(x, ...) UseMethod("wdata",x)
+wdata.well = function(x) x$data
+"wdata<-" = function(x, ...) UseMethod("wdata<-",x)
+"wdata<-.well" = function(x, value) { x$data = value ; x }
+
+tdata = function(x, ...) UseMethod("tdata", x)
+tdata.well = function(x) wdata(x)$t
+"tdata<-" = function(x, ...) UseMethod("tdata<-",x)
+"tdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "t", value); x}
+
+# Get the index at which an ID happened
+# If the ID isn't given, then all of the times
+# with the ID's as the name
+ID_i = function(x,...) UseMethod("ID_i", x)
+ID_i.default = function(x, ...) return(NA)
+ID_i.action = function(x, ...) action(x, ...)$i
+ID_i.actionList = function(x, ...) sapply( actionList(x, ...), ID_i )
+ID_i.well = function(x, ...) sapply( actionList(x, ...), ID_i )
+ID_i.wellList = function( x, ... ) sapply(x, ID_i, ... )
+
+# Get the time at which an ID happened
+ID_t = function(x,...) UseMethod("ID_t", x)
+ID_t.default = function(x, ...) return(NA)
+ID_t.well = function(x, ...) i_t(x, ID_i(x, ...))
+ID_t.wellList = function( x, ... ) sapply(x, ID_t, ... )
+
+
+# Accessor for Solution
+# For actionList and well, the default is to return all solutions (ID=NA)
+# The default for wellList is to return the solution for the last solution
+# other option to return last solution (ID="last")
+# if ID is character length 1, then return solution for the action with that ID
+# if an action with that ID doesn't exist, return NA as the solution
+# Do not allow length(ID)>1
+solution = function(x,...) UseMethod("solution",x)
+solution.default = function(x, ...) return(NA)
+solution.action = function(x) x$solution
+solution.actionList = function(x,ID=NA) {
+  if( is.na(ID) ) return( lapply(x, solution) )
+  return( solution(action(x, ID)) )
+}
+solution.well = function(x, ...) solution( actionList(x), ...)
+solution.wellList = function(x, ID="last") lapply(x, solution, ID)
+"solution<-" = function(x,value) UseMethod("solution<-",x)
+"solution<-.action" = function(x,value) x[["solution"]] = value
+"solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
+"solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
+
+# Accessor for action
+# default is to return the last action (ID="last")
+action = function(x, ...) UseMethod("action", x)
+action.action = function(x, ID=NA) {
+  if(is.na(ID) || ID==x$ID ) return(x)
+  return(NA)
+}
+action.actionList = function(x, ID="last") {
+  if( ID=="last" ) return( x[[length(x)]] )
+  if( length(ID)!=1 ) stop("ID argument must be of length 1")
+  if( !(ID %in% ID(x)) ) return(NA)
+  return( x[[ID]] )
+}
+action.well = function(x, ...) action( actionList(x), ... )
+action.wellList = function(x, ... ) lapply( x, action, ... )
+
+# Accessor for actionList
+# default is to return full actionList (ID=NULL)
+actionList = function(x, ...) UseMethod("actionList",x)
+actionList.actionList = function(x, ID=NULL) {
+  if(is.null(ID)) return(x)
+  if(ID=="last") return(x[length(x)])
+  matched.ids = ID[ ID %in% ID(x) ]
+  if(length(matched.ids)==0) return(NA)
+  x[matched.ids]
+}
+actionList.well = function(x, ...) actionList(x$actions, ...)
+actionList.wellList = function(x, ...) lapply(x,actionList, ...)
+"actionList<-" = function(x,value) UseMethod("actionList<-",x)
+"actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 
 
 ###############################################################
