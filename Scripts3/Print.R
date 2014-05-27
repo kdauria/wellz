@@ -49,8 +49,8 @@ print.well = function( well ) {
   
   if(length(well$data)!=0) {
     cat("\n\n")
-    #print_well_data(well$data)
-    print(well$data)
+    print_well_data(well$data)
+    #print(well$data)
   }
 }
 

@@ -85,8 +85,13 @@ list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
 # Checks if something is a character of length 1
 is_char_len1 = function(x) is.character(x) && length(x)==1
 
-
-
+# A special row function meant to be fast
+rowSD = function(x) {
+  mat = as.matrix(x)
+  m = nrow(mat)
+  n = ncol(mat)
+  .rowSums( (mat - .rowMeans(mat,m,n))^2, m, n )^2 / (ncol(mat)-1)
+}
 
 
 

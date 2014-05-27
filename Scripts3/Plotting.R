@@ -17,18 +17,20 @@
 # Note error here is the gray values that are because of NA values
 # Should throw an error here and remove them from the plot
 # That's not really possible actually. It should be done at the select stage
-x = select(wells,file="HCT8.txt")[1:4]
-x = select(wells,file="HCT8.txt", ID="toxinAdd")
-
-
-ggplot(x, color="concentration", diagnostic=1) + geom_line()
-
-a = plot(x, color="concentration", diagnostic=1, ID="toxinAdd", type="all")
-a = plot(x, diagnostic=3, xlim=c(45,55), points=TRUE, color="concentration")
+# x = select(wells,file="HCT8.txt")[1:4]
+# x = select(wells,file="HCT8.txt", ID="toxinAdd")
+# x = select(wells,"TcdA", filename="CecalCells.txt", controls=TRUE)
+# a = plot(x, color="concentration", diagnostic=1, ID="toxinAdd", type="all")
+# a = plot(x, diagnostic=3, xlim=c(34,38), points=FALSE, color="concentration")
+# args = list(color="concentration")
+# points=FALSE
+# xlim = c(34,38)
+# discrete=TRUE
+# diagnostic=3
 
 # The ... possibilities are:
 #  type, ID, compound, solvent AND plot parameters
-plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, lines=TRUE ) {
+plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, discrete=TRUE ) {
   
   args = list(...)
   args = highlight_well( args, diagnostic )
@@ -41,13 +43,24 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, points=FALSE, line
   if(!is.null(xlim)) data = data[ t<xlim[2] & t>xlim[1], ]
 
   base.plot = ggplot(data, maes) + geom_line()
+  if(discrete) make_discrete( base.plot, maes )
   title = add_title( x, args, diagnostic )
   points = if(points) geom_point() else NULL
-  lines = if(lines) geom_line() else NULL
   text = if(!is.null(diagnostic)) diagnostic_lines(base.plot, diagnostic) else NULL
   
-  return(base.plot + title + lines + points + text)
+  return(base.plot + title + points + text)
+  #return(data)
+}
+
+# Make some of the plot parameters discrete if they
+# are continuous. This is so colors will be easier to distinguish
+# instead of colors of the same hue but different intensity
+make_discrete = function( p, ast, discrete.params = c("colour","fill","size")) {
   
+  ast.str = as.character(ast)
+  discrete.vars = ast.str[ names(ast.str) %in% discrete.params ]
+  for( dvar in discrete.vars ) set(p$data,i=NULL, dvar, factor(p$data[[dvar]]))
+  return(TRUE)
 }
 
 # Add lines and text showing the 'i' (index) of each
@@ -56,8 +69,7 @@ diagnostic_lines = function( p, diagnostic ) {
   
   # Find the location of ticks and the range of the plot
   g = ggplot_build(p)
-  ylim = g$panel$ranges[[1]]$y.range
-  xlim = g$panel$ranges[[1]]$x.range
+  g.ylim = g$panel$ranges[[1]]$y.range
   ticks = g$panel$ranges[[1]]$x.minor_source
   
   # Find which 'i' are closest to the ticks
@@ -66,8 +78,10 @@ diagnostic_lines = function( p, diagnostic ) {
   ticks.i = vapply( ticks, function(x) which.min(abs(x-p$data$t)), 1)
   subdata = p$data[ticks.i,]
   
-  out1 = geom_text(data=subdata, aes(x=t,label=i), y=ylim[2], alpha=1, vjust=1, color="gray50")
-  out2 = geom_linerange(data=subdata, aes(x=t,ymin=value+diff(ylim)*0.01), ymax=ylim[2]*0.95, alpha=1, color="gray50")
+  out1 = geom_text(data=subdata, aes(x=t,label=i), y=g.ylim[2], alpha=1, vjust=1, color="gray50")
+  subdata[ , ymin:=value+diff(g.ylim)*0.01 ]
+  out2 = geom_linerange(data=subdata, aes(x=t,ymin=ymin), 
+                        ymax=g.ylim[2]*0.95, alpha=1, color="gray50")
   list(out1, out2)
 }
 

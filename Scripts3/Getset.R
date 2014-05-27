@@ -278,7 +278,7 @@ solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
   
   # make sure a numeric is returned if there is only one solvent in all wells
   if(is.null(solvent)) {
-    nms = compound_names(x, collapse=FALSE, type=type)
+    nms = solvent_names(x, collapse=FALSE)
     if( length(unique(nms))==1 ) solvent = nms
   }
   sapply( x, solvent_percentages, solvent=solvent, ... )

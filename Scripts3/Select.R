@@ -1,15 +1,20 @@
 #### Find wells that match the requested parameters
 search = function(x,...) UseMethod("search",x)
-search.wellList = function(wells,compstr=NULL,filename=NULL,code=NULL,ID="last") {
+search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",controls=FALSE) {
   
   # filename & code
-  yn = rep(TRUE,length(wells))
-  if(!is.null(filename)) yn = yn & filename(wells) %in% filename
-  if(!is.null(code)) yn = yn & code(wells) %in% code
-  if(ID!="last") yn = yn & sapply( ID(wells), function(x) ID %in% x )
+  yn = rep(TRUE,length(x))
+  if(!is.null(filename)) yn = yn & filename(x) %in% filename
+  if(!is.null(code)) yn = yn & code(x) %in% code
+  if(ID!="last") yn = yn & sapply( ID(x), function(x) ID %in% x )
   if(!is.null(compstr)) {
     bounds = parse_comp_str( compstr )
-    yn = yn & sapply(wells, match_well_string, compstr, bounds, ID)
+    yn = yn & sapply(x, match_well_string, compstr, bounds, ID)
+  }
+  if(controls) {
+    files = filename(x)
+    concs = concentration(x,type="start",ID=ID)
+    yn[ concs %in% "" & files %in% unique(files[yn]) ] = TRUE
   }
   yn
 }

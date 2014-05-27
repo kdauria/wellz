@@ -18,7 +18,16 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
     }
   }
   
+  # Add the data to the wells
   wells = add_data(wells, data.dir, parse_fun )
+  
+  # Add an interpolating spline to all the wells
+  message("Adding interpolating splines")
+  #for( i in seq_along(wells))
+  #  wells[[i]]$spline = splinefun( x=wells[[i]]$data$t, y=wells[[i]]$data$value, method="monoH.FC" )
+  wells = add_spline(wells)
+  
+  return(wells)
 }
 
 # Read the data into R
