@@ -71,19 +71,12 @@ cppFunction('
             return out;  }')
 "code<-" = function(x,value) UseMethod("code<-",x)
 "code<-.well" = function(x,value) x[["code"]] = value
-"code<-.wellList" = function(x,value) code_replace_rcpp(x,value)
-cppFunction('
-  List code_replace_rcpp( List x, CharacterVector value) {
-            List temp;
-            unsigned int n=x.size(), i;
-            List out(n);
-            for( i = 0; i<n ; i++ ) {
-              temp = as<List>(x[i]);
-              temp["code"] = as<std::string>(value[i]);
-              out[i] = temp;
-            }
-            out.attr("class") = x.attr("class");
-            return out;  }')
+"code<-.wellList" = function(x,value) {
+  for( i in seq_along(x)) {
+    x[[i]]$code = value[i]
+  }
+  x
+}
 
 ######### "file" or "filename"
 filename = function(x) UseMethod("filename",x)
@@ -101,19 +94,12 @@ cppFunction('
             return out;  }')
 "filename<-" = function(x,value) UseMethod("filename<-",x)
 "filename<-.well" = function(x,value) x[["file"]] = value
-"filename<-.wellList" = function(x,value) filename_replace_rcpp(x,value)
-cppFunction('
-  List filename_replace_rcpp( List x, CharacterVector value) {
-            List temp;
-            unsigned int n=x.size(), i;
-            List out(n);
-            for( i = 0; i<n ; i++ ) {
-            temp = as<List>(x[i]);
-            temp["file"] = as<std::string>(value[i]);
-            out[i] = temp;
-            }
-            out.attr("class") = x.attr("class");
-            return out;  }')
+"filename<-.wellList" = function(x,value) {
+for( i in seq_along(x)) {
+    x[[i]]$file = value[i]
+  }
+  x
+}
 
 ####### "index# or "time" of an action
 index = function(x) UseMethod("index",x)
@@ -133,18 +119,6 @@ cppFunction('
 "index<-" = function(x,value) UseMethod("i<-",x)
 "index<-.action" = function(x,value) x[["i"]] = value
 "index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
-cppFunction('
-  List index_actionList_replace_rcpp( List x, NumericVector value) {
-            List temp;
-            unsigned int n=x.size(), i;
-            List out(n);
-            for( i = 0; i<n ; i++ ) {
-              temp = as<List>(x[i]);
-              temp["i"] = value[i];
-              out[i] = temp;
-            }
-            out.attr("class") = x.attr("class");
-            return out;  }')
 
 
 ######### "ID" of actions
@@ -167,10 +141,15 @@ volume.Solution = function(x) x$volume
 volume.well = function(x, ...) solution(x, ...)$volume
 volume.wellList = function(x, ...) sapply(x, volume, ...)
 
-# Take the index for a data point and give the time value
+# Take the index for a data point and give the time
 i_t = function(x, ...) UseMethod("i_t", x)
 i_t.default = function(x, ...) return(NA)
 i_t.well = function(x, i) wdata(x)$t[ match(i, wdata(x)$i) ]
+
+# Take the index for a data point and give the value
+i_v = function(x, ...) UseMethod("i_v", x)
+i_v.default = function(x, ...) return(NA)
+i_v.well = function(x, i) wdata(x)$value[ match(i, wdata(x)$i) ]
 
 # Accessor to data of a well
 wdata = function(x, ...) UseMethod("wdata",x)
@@ -182,6 +161,11 @@ tdata = function(x, ...) UseMethod("tdata", x)
 tdata.well = function(x) wdata(x)$t
 "tdata<-" = function(x, ...) UseMethod("tdata<-",x)
 "tdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "t", value); x}
+
+vdata = function(x, ...) UseMethod("vdata", x)
+vdata.well = function(x) wdata(x)$value
+"vdata<-" = function(x, ...) UseMethod("vdata<-",x)
+"vdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "value", value); x}
 
 # Get the index at which an ID happened
 # If the ID isn't given, then all of the times
@@ -199,6 +183,11 @@ ID_t.default = function(x, ...) return(NA)
 ID_t.well = function(x, ...) i_t(x, ID_i(x, ...))
 ID_t.wellList = function( x, ... ) sapply(x, ID_t, ... )
 
+# Get the time at which an ID happened
+ID_v = function(x,...) UseMethod("ID_v", x)
+ID_v.default = function(x, ...) return(NA)
+ID_v.well = function(x, ...) i_v(x, ID_i(x, ...))
+ID_v.wellList = function( x, ... ) sapply(x, ID_v, ... )
 
 # Accessor for Solution
 # For actionList and well, the default is to return all solutions (ID=NA)
@@ -224,11 +213,11 @@ solution.wellList = function(x, ID="last") lapply(x, solution, ID)
 # Accessor for action
 # default is to return the last action (ID="last")
 action = function(x, ...) UseMethod("action", x)
-action.action = function(x, ID=NA) {
+action.action = function(x, ID=NA, ...) {
   if(is.na(ID) || ID==x$ID ) return(x)
   return(NA)
 }
-action.actionList = function(x, ID="last") {
+action.actionList = function(x, ID="last", ...) {
   if( ID=="last" ) return( x[[length(x)]] )
   if( length(ID)!=1 ) stop("ID argument must be of length 1")
   if( !(ID %in% ID(x)) ) return(NA)
@@ -240,7 +229,7 @@ action.wellList = function(x, ... ) lapply( x, action, ... )
 # Accessor for actionList
 # default is to return full actionList (ID=NULL)
 actionList = function(x, ...) UseMethod("actionList",x)
-actionList.actionList = function(x, ID=NULL) {
+actionList.actionList = function(x, ID=NULL, ...) {
   if(is.null(ID)) return(x)
   if(ID=="last") return(x[length(x)])
   matched.ids = ID[ ID %in% ID(x) ]
@@ -261,7 +250,7 @@ actionList.wellList = function(x, ...) lapply(x,actionList, ...)
 solvent_names = function(x,...) UseMethod("solvent_names",x)
 solvent_names.default = function(x,...) return(NA)
 solvent_names.Solution = function(x, ...) x$solvent$name
-solvent_names.well = function(x, ... ) solvent_names(solution(x, ...))
+solvent_names.well = function(x, ID="last", ... ) solvent_names(solution(x, ID="last", ...))
 solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, solvent_names, ...)
   out = list_concat_str( nms, unique=unique, collapse=collapse )
@@ -280,14 +269,15 @@ compound_names.Solution = function(x, type="all" ) {
     return( x$compounds$name[ x$compounds$type==type ] )
   }
 }
-compound_names.well = function(x, type="start", ...) {
-  compound_names( solution(x, ...), type=type )
+compound_names.well = function(x, type="start", ID="last", ...) {
+  compound_names( solution(x, ID=ID, ...), type=type )
 }
 compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, compound_names, ...)
   out = list_concat_str(nms, unique=unique, collapse=collapse)
   return(out)
 }
+
 
 ######## "concentration" of a well, wellList
 concentration = function(x,...) UseMethod("concentration", x)
@@ -309,8 +299,8 @@ concentration.Solution = function( x, compound=NULL, type="start" ) {
   out = paste(comp.rows$name, format1(comp.rows$conc), sep="-", collapse=", ")
   return(out)
 }
-concentration.well = function(x, compound=NULL, type="start", ... ) {
-  concentration(solution(x, ... ), type=type, compound=compound )
+concentration.well = function(x, compound=NULL, ID="last", type="start", ... ) {
+  concentration(solution(x, ID=ID, ... ), type=type, compound=compound )
 }
 concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   
@@ -322,7 +312,7 @@ concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   sapply( x, concentration, compound=compound, type=type, ... )
 }
 
-
+######## "solvent_percentages" of a well, wellList
 solvent_percentages = function(x, ...) UseMethod("solvent_percentages",x)
 solvent_percentages.default = function(x, ...) return(NA)
 solvent_percentages.Solution = function(x, solvent=NULL, ...) {
@@ -339,8 +329,8 @@ solvent_percentages.Solution = function(x, solvent=NULL, ...) {
   out = paste( x$solvent$name, format1(x$solvent$perc), sep="-", collapse=", ")
   return(out)
 }
-solvent_percentages.well = function(x, solvent=NULL, ... ) {
-  solvent_percentages( solution(x,...), solvent=solvent )
+solvent_percentages.well = function(x, solvent=NULL, ID="last", ... ) {
+  solvent_percentages( solution(x, ID=ID, ...), solvent=solvent )
 }
 solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
   

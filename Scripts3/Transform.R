@@ -42,3 +42,73 @@ average_replicates = function(x) {
   }
   new.x
 }
+
+
+###### Finally create a generic function for the transformations
+# methods is either a list of functions (e.g, created one created with `c()`)
+# or a single function
+transform.well = function(x, methods, ...) {
+  if(length(methods)==1) return( methods(x,...) )
+  for( m in methods ) x = m(x, ...)
+  return(x)
+}
+transform.wellList = transform.well
+
+######## Time centering
+tcenter = function(x,...) UseMethod("tcenter",x)
+tcenter.well = function(x, ID="last", ...) {
+  centered.time = ID_t(x, ID=ID, ...)
+  tdata(x) = tdata(x) - centered.time
+  x
+}
+tcenter.wellList = function(x, ...) {
+  x = lapply(x, tcenter, ...)
+  class(x) = c("wellList","list")
+  x
+}
+
+######## Normalize to a point in time
+normalize = function(x, ...) UseMethod("normalize", x)
+normalize.well = function(x, ID="last", ...) {
+  norm.val = ID_v(x, ID=ID)
+  vdata(x) = vdata(x)/norm.val
+  x
+}
+normalize.wellList = function(x, ...) {
+  x = lapply(x, normalize, ...)
+  class(x) = c("wellList","list")
+  x
+}
+
+####### Slice a piece of time
+slice = function(x, ...) UseMethod("slice", x)
+slice.well = function(x, xlim, ...) {
+  wdata(x) = wdata(x)[ tdata(x) > xlim[1] & tdata(x) < xlim[2], ]
+  x
+}
+slice.wellList = function(x, ...) {
+  x = lapply(x, slice, ...)
+  class(x) = c("wellList","list")
+  x
+}
+
+###### Level to a point in time
+level = function(x, ...) UseMethod("level", x)
+level.well = function(x, ID="last", ...) {
+  norm.val = ID_v(x, ID=ID)
+  vdata(x) = vdata(x) - norm.val
+  x
+}
+level.wellList = function(x, ...) {
+  x = lapply(x, level, ...)
+  class(x) = c("wellList","list")
+  x
+}
+
+
+
+
+
+
+
+

@@ -125,7 +125,7 @@ metadata_to_wells = function( meta.df ) {
       new.actions = structure( c( wells[[well.i]]$actions, structure(list(y),names=y$ID )),
                                class=c("actionList","list"))
       wells[[well.i]]$actions = structure( new.actions[ order(index(new.actions)) ],
-                                           class=c("actionList","list"))
+                                           class=c("actionList","list"), names=ID(new.actions))
     }
   }
   wells

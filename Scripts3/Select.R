@@ -37,10 +37,9 @@ parse_comp_str = function( comp.string ) {
   # get string between each boolean operator
   sp = "[[:space:]]*"
   pattern = paste0(sp,"[[:alnum:]\\-\\.\\_]+",sp,
-                   "\\[*",sp,"[[:digit:][:space:]-]*","\\]*",sp)
+                   "\\[*",sp,"[[:digit:][:space:]\\.-]*","\\]*",sp)
   matches = str_match_all(comp.string, pattern)[[1]]
   comps = gsub("[[:space:]]","",matches)
-  comps
   
   # split the names and concenctrations of each string
   comp = lapply( comps, function(x) strsplit(x,"\\s*\\[\\s*")[[1]])
@@ -73,6 +72,7 @@ match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
 
   out = logical(nrow(bounds))
   sn = solution(well,ID=ID)
+  if( length(sn)==1 && is.na(sn) ) return(FALSE)
   
   # figure out which part of the bounds are satisfied
   for( i in 1:nrow(bounds) ) {
@@ -90,7 +90,7 @@ match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
   # Replace the compounds with the TRUE/FALSE if they matched the well
   sp = "[[:space:]]*"
   pattern = paste0(sp,"[[:alnum:]\\-\\.\\_]+",sp,
-                   "\\[*",sp,"[[:digit:][:space:]-]*","\\]*",sp)
+                   "\\[*",sp,"[[:digit:][:space:]\\.-]*","\\]*",sp)
   notmatched = strsplit(s,pattern)[[1]]
   if( length(notmatched)==length(out) ) {
     eval.string = paste0(notmatched,out,collapse="")
