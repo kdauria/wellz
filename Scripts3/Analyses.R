@@ -1,4 +1,18 @@
 
+
+
+
+
+
+smoother=TRUE
+
+
+type = if(smoother) "smoother" else "spline"
+aa = insert_n_between_spline(x, type="smoother", deriv=1, n=5)
+
+
+
+
 # Find the maximum rate and the time at which it occurs
 max.rate = function(x,...) UseMethod("max.rate",x)
 max.rate.wellList = function( wells, ID, ... ) {

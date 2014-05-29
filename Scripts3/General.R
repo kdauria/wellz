@@ -96,7 +96,7 @@ rowSD = function(x) {
 
 # insert n linearly interpolated numbers into a vector
 # that can only be as close as min.dx
-insert_na_between = function(x, n, min.dx=NULL ) {
+insert_na_between = function(x, n, min.dx=NULL, ... ) {
   if( !is.null(min.dx)) {
     n_bw = pmax(0, pmin( floor(diff(x)/min.dx)-1, n ) )
     out = rep(NA_real_, length(x) + sum(n_bw) )

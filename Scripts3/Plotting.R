@@ -6,10 +6,12 @@
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
                           spline=FALSE, line=NULL, nbw=5, min.dx=NULL,
-                          smoother=FALSE) {
+                          smoother=FALSE, deriv=0) {
   
+  if( deriv>0 ) smoother = TRUE
   if( is.null(line) & (spline | smoother)) line = FALSE
   if( is.null(line) ) line = TRUE
+  if(!is.null(xlim)) x = slice(x, xlim=xlim)
   if(replicates) x = average_replicates(x)
   
   args = list(...)
@@ -20,20 +22,20 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   maes = do.call( well_aes, c(list(x),args) )
   maes$group = quote(interaction(file,location))
   
+  # Line, spline, and smoothers
+  line = if(line) geom_line() else NULL
+  spline = add_spline_to_plot( x, nbw=nbw, min.dx=min.dx, 
+                               spline=spline, discrete=discrete, maes=maes, args=args, deriv=deriv)
+  gg.smoother = add_smoother_to_plot( x, nbw=nbw, min.dx=min.dx, 
+                                     smoother=smoother, discrete=discrete, maes=maes, args=args, deriv=deriv)
+  
   # Melt the data into ggplot format
-  if(!is.null(xlim)) x = slice(x, xlim=xlim)
+  if(deriv>0 && smoother) x = insert_n_between_spline(x=x,deriv=deriv,type="smoother",n=0)
   data = do.call( melt_wellList_params, c(list(x),args) )
 
   # Base plot and the data
   base.plot = ggplot(data, maes)
   if(discrete) make_discrete( data, maes )
-  
-  # Line, spline, and smoothers
-  line = if(line) geom_line() else NULL
-  spline = add_spline_to_plot( x, nbw=nbw, min.dx=min.dx, 
-                               spline=spline, discrete=discrete, maes=maes, args=args)
-  smoother = add_smoother_to_plot( x, nbw=nbw, min.dx=min.dx, 
-                                   smoother=smoother, discrete=discrete, maes=maes, args=args)
   
   # Points if requested
   points = if(points) geom_point() else NULL
@@ -46,7 +48,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   base.plot$data = data
   text = diagnostic_lines(x, base.plot+ribbon, diagnostic)
   
-  return(base.plot + title + points + text + ribbon + line + spline + smoother)
+  return(base.plot + title + points + text + ribbon + line + spline + gg.smoother)
 }
 
 plot.well = function(x, ...) {
@@ -56,17 +58,17 @@ plot.well = function(x, ...) {
 
 # Add a spline that interpolates values between points
 add_spline_to_plot = function( x, nbw, min.dx=NULL, 
-                               spline, discrete, maes, args) {
+                               spline, discrete, maes, args, deriv) {
   if(!spline) return(NULL)
-  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx)
+  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx, deriv=deriv)
   data.spline = do.call( melt_wellList_params, c(list(newx),args) )
   if(discrete) make_discrete( data.spline, maes)
   geom_line(data=data.spline)
 }
 add_smoother_to_plot = function( x, nbw, min.dx=NULL, 
-                                 smoother, discrete, maes, args) {
+                                 smoother, discrete, maes, args, deriv) {
   if(!smoother) return(NULL)
-  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx, type="smoother")
+  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx, type="smoother", deriv=deriv)
   data.smoother = do.call( melt_wellList_params, c(list(newx),args) )
   if(discrete) make_discrete( data.smoother, maes)
   geom_line(data=data.smoother)
