@@ -29,9 +29,13 @@
 # diagnostic=3
 
 # The ... possibilities are:
-#  type, ID, compound, solvent AND plot parameters
+# #  type, ID, compound, solvent AND plot parameters
+# diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
+# spline=FALSE; line=!spline; args=list(color="concentration")
+# nbw=5; min.dx=NULL
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
-                          points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates ) {
+                          points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
+                          spline=FALSE, line=!spline, nbw=5, min.dx=NULL ) {
   
   if(replicates) x = average_replicates(x)
   
@@ -39,25 +43,52 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   args = highlight_well( x, args, diagnostic )
   args = arg_defaults( args )
   
+  # Set up the aesthetics from possible groupins of wells
   maes = do.call( well_aes, c(list(x),args) )
   maes$group = quote(interaction(file,location))
   
+  # Melt the data into ggplot format
+  if(!is.null(xlim)) x = slice(x, xlim=xlim)
   data = do.call( melt_wellList_params, c(list(x),args) )
-  if(!is.null(xlim)) data = data[ t<xlim[2] & t>xlim[1], ]
 
-  base.plot = ggplot(data, maes) + geom_line()
-  if(discrete) make_discrete( base.plot, maes )
-  title = add_title( x, args, diagnostic )
+  # Base plot and the data
+  base.plot = ggplot(data, maes)
+  if(discrete) make_discrete( data, maes )
+  
+  # Line, spline, and smoothers
+  line = if(line) geom_line() else NULL
+  spline = add_spline_to_plot( x, nbw=nbw, min.dx=min.dx, 
+                               spline=spline, discrete=discrete, maes=maes, args=args)
+  
+  # Points if requested
   points = if(points) geom_point() else NULL
+  
+  # Decoration
+  title = add_title( x, args, diagnostic )
   ribbon = sd_ribbon(maes, sd)
+  
+  # Add diagnostic annotations if requested
+  base.plot$data = data
   text = diagnostic_lines(x, base.plot+ribbon, diagnostic)
   
-  return(base.plot + title + points + text + ribbon)
+  return(base.plot + title + points + text + ribbon + line + spline)
 }
 
 plot.well = function(x, ...) {
   plot( structure( list(x), class=c("wellList","list") ), ...)
 }
+
+
+# Add a spline that interpolates values between points
+add_spline_to_plot = function( x, nbw, min.dx=NULL, 
+                               spline, discrete, maes, args) {
+  if(!spline) return(NULL)
+  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx)
+  data.spline = do.call( melt_wellList_params, c(list(newx),args) )
+  if(discrete) make_discrete( data.spline, maes)
+  geom_line(data=data.spline)
+}
+
 
 # Whether or not to show errors from the replicate wells
 sd_ribbon = function(maes, sd) {
@@ -73,11 +104,11 @@ sd_ribbon = function(maes, sd) {
 # Make some of the plot parameters discrete if they
 # are continuous. This is so colors will be easier to distinguish
 # instead of colors of the same hue but different intensity
-make_discrete = function( p, ast, discrete.params = c("colour","fill","size")) {
+make_discrete = function( x, ast, discrete.params = c("colour","fill","size")) {
   
   ast.str = as.character(ast)
   discrete.vars = ast.str[ names(ast.str) %in% discrete.params ]
-  for( dvar in discrete.vars ) set(p$data,i=NULL, dvar, factor(p$data[[dvar]]))
+  for( dvar in discrete.vars ) set(x, i=NULL, dvar, factor(x[[dvar]]))
   return(TRUE)
 }
 

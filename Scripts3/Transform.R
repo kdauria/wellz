@@ -59,6 +59,7 @@ tcenter = function(x,...) UseMethod("tcenter",x)
 tcenter.well = function(x, ID="last", ...) {
   centered.time = ID_t(x, ID=ID, ...)
   tdata(x) = tdata(x) - centered.time
+  x = add_spline(x)
   x
 }
 tcenter.wellList = function(x, ...) {
@@ -72,6 +73,7 @@ normalize = function(x, ...) UseMethod("normalize", x)
 normalize.well = function(x, ID="last", ...) {
   norm.val = ID_v(x, ID=ID)
   vdata(x) = vdata(x)/norm.val
+  x = add_spline(x)
   x
 }
 normalize.wellList = function(x, ...) {
@@ -84,6 +86,7 @@ normalize.wellList = function(x, ...) {
 slice = function(x, ...) UseMethod("slice", x)
 slice.well = function(x, xlim, ...) {
   wdata(x) = wdata(x)[ tdata(x) > xlim[1] & tdata(x) < xlim[2], ]
+  x = add_spline(x)
   x
 }
 slice.wellList = function(x, ...) {
@@ -97,6 +100,7 @@ level = function(x, ...) UseMethod("level", x)
 level.well = function(x, ID="last", ...) {
   norm.val = ID_v(x, ID=ID)
   vdata(x) = vdata(x) - norm.val
+  x = add_spline(x)
   x
 }
 level.wellList = function(x, ...) {

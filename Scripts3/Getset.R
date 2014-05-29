@@ -167,6 +167,11 @@ vdata.well = function(x) wdata(x)$value
 "vdata<-" = function(x, ...) UseMethod("vdata<-",x)
 "vdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "value", value); x}
 
+idata = function(x, ...) UseMethod("idata", x)
+idata.well = function(x) wdata(x)$i
+"idata<-" = function(x, ...) UseMethod("idata<-",x)
+"idata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "i", value); x}
+
 # Get the index at which an ID happened
 # If the ID isn't given, then all of the times
 # with the ID's as the name
