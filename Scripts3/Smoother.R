@@ -49,12 +49,6 @@ fsmoother_curfit = function( x, y, w=NULL, s=NULL, knots=NULL, n=NULL, ... ) {
   function(x, deriv=0) deriv(object,x,order=deriv)
 }
 
-aa = x[[1]]
-x1 = tdata(aa)
-y1 = vdata(aa)
-sum(diff(y1)^2) # upper limit on the smoothing
-fsmoother_composite(x1,y1,0.95)
-
 # The Dierckx package attempts to find a curve 
 # whose sum(residuals^2) is equal to a user-chosen number s
 # The choice made here is that the first order derivative
@@ -67,7 +61,6 @@ fsmoother_composite(x1,y1,0.95)
 # of the moving average and the actual data point is small, the
 # residual at this point is assumed to be zero (due to noise). 
 # Smaller windows set more stringent requirements on what constitutes noise
-
 fsmoother_composite = function(x, y, sp=1, min.dy=0, window.width=NULL) {
   if( is.null(window.width) ) {
     resid = diff(y)
@@ -87,26 +80,6 @@ fsmoother_composite = function(x, y, sp=1, min.dy=0, window.width=NULL) {
 ############################################################
 #             Supporting smoother functions                #
 ############################################################
-
-# take a well, bin it, and output a data.table
-get_bins = function(x, nbins=NULL, width=NULL) {
-  xrange = range(x)
-  stopifnot( xor( is.null(nbins), is.null(width) ) )
-  if(is.null(nbins)) nbins = ceiling(diff(xrange)/width)
-  
-  breaks = seq(xrange[1], xrange[2], length.out=nbins)
-  .bincode( x, breaks )
-}
-bin_well_data = function(x, ...) {
-  
-  out = data.table(wdata(x))
-  bins = get_bins(tdata(x), ...)
-  bins[1] = 1
-  
-  out[, bin:=bins]
-  out[,list(t,value=mean(value)),by=bin]
-}
-
 
 # A moving average smoother. Can do binning before rolling.
 # Can also take the forward difference between rolling and smoothing
