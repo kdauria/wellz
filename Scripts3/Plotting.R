@@ -1,42 +1,15 @@
 
-# Possible aesthetics
 
-# for line plot
-# color
-# linetype
-# size (linewidth)
-# alpha
-
-# for point plot
-# color
-# fill
-# alpha
-# shape
-# size
-
-# Note error here is the gray values that are because of NA values
-# Should throw an error here and remove them from the plot
-# That's not really possible actually. It should be done at the select stage
-# x = select(wells,file="HCT8.txt")[1:4]
-# x = select(wells,file="HCT8.txt", ID="toxinAdd")
-# x = select(wells,"TcdA", filename="CecalCells.txt", controls=TRUE)
-# a = plot(x, color="concentration", diagnostic=1, ID="toxinAdd", type="all")
-# a = plot(x, diagnostic=3, xlim=c(34,38), points=FALSE, color="concentration")
-# args = list(color="concentration")
-# points=FALSE
-# xlim = c(34,38)
-# discrete=TRUE
-# diagnostic=3
-
-# The ... possibilities are:
-# #  type, ID, compound, solvent AND plot parameters
 # diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
 # spline=FALSE; line=!spline; args=list(color="concentration")
 # nbw=5; min.dx=NULL
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
-                          spline=FALSE, line=!spline, nbw=5, min.dx=NULL ) {
+                          spline=FALSE, line=NULL, nbw=5, min.dx=NULL,
+                          smoother=FALSE) {
   
+  if( is.null(line) & (spline | smoother)) line = FALSE
+  if( is.null(line) ) line = TRUE
   if(replicates) x = average_replicates(x)
   
   args = list(...)
@@ -59,6 +32,8 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   line = if(line) geom_line() else NULL
   spline = add_spline_to_plot( x, nbw=nbw, min.dx=min.dx, 
                                spline=spline, discrete=discrete, maes=maes, args=args)
+  smoother = add_smoother_to_plot( x, nbw=nbw, min.dx=min.dx, 
+                                   smoother=smoother, discrete=discrete, maes=maes, args=args)
   
   # Points if requested
   points = if(points) geom_point() else NULL
@@ -71,7 +46,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   base.plot$data = data
   text = diagnostic_lines(x, base.plot+ribbon, diagnostic)
   
-  return(base.plot + title + points + text + ribbon + line + spline)
+  return(base.plot + title + points + text + ribbon + line + spline + smoother)
 }
 
 plot.well = function(x, ...) {
@@ -88,7 +63,14 @@ add_spline_to_plot = function( x, nbw, min.dx=NULL,
   if(discrete) make_discrete( data.spline, maes)
   geom_line(data=data.spline)
 }
-
+add_smoother_to_plot = function( x, nbw, min.dx=NULL, 
+                                 smoother, discrete, maes, args) {
+  if(!smoother) return(NULL)
+  newx = insert_n_between_spline( x, n=nbw, min.dx=min.dx, type="smoother")
+  data.smoother = do.call( melt_wellList_params, c(list(newx),args) )
+  if(discrete) make_discrete( data.smoother, maes)
+  geom_line(data=data.smoother)
+}
 
 # Whether or not to show errors from the replicate wells
 sd_ribbon = function(maes, sd) {

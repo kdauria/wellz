@@ -13,11 +13,11 @@ add_spline.wellList = function(x, ...) {
 # Insert n interpolated data points in between each data point
 # The minimum space allowed between points is min.dx
 insert_n_between_spline = function(x,...) UseMethod("insert_n_between_spline",x)
-insert_n_between_spline.well = function( x, ... ) {
+insert_n_between_spline.well = function( x, ..., type="spline" ) {
   new.i = insert_na_between( tdata(x), ... )
   new.t = na_interp( new.i )
   new.i[!is.na(new.i)] = idata(x)
-  new.value = x$spline( new.t )
+  new.value = x[[type]]( new.t )
   wdata(x) = data.frame( i = new.i, t = new.t, value = new.value )
   x
 }

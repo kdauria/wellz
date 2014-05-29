@@ -1,26 +1,3 @@
-# Different smoothing splines that can be applied to the data.
-# All smoother_* functions return the fit from many different
-# smoothing functions. Therefore, the outputs from each 
-# function are not consistent
-smoother_lokerns = function(x, ...) UseMethod("smoother_lokerns", x)
-smoother_lokerns.default = function(x,y,...) {
-  lfit = lokerns(x,y,...)
-  lfit$trace.lev=0
-  lfit$n = lfit$nobs
-  return(lfit)
-}
-
-
-# Smoothing with the stats package
-smoother_smooth.spline = function(x, ...) UseMethod("smoother_smooth.spline", x)
-smoother_smooth.spline.default = function(x,...) smooth.spline(x, ...)
-
-# Smoothing with the Dierckx package
-smoother_curfit = function(x, ...) UseMethod("smoother_curfit", x)
-smoother_curfit.default = function(x, y=NULL, w=NULL, s=NULL, knots=NULL, n=NULL, ...) {
-  if( is.null(s) && is.null(knots) && is.null(n) ) n = min( 100, ceiling(length(x)/2))
-  curfit(x,y,w,s,knots,n,...)
-}
 
 # Find the midpoints between each element of the numeric vector
 midpoint = function(x) UseMethod("midpoint",x)

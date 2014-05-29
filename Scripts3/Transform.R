@@ -40,6 +40,7 @@ average_replicates = function(x) {
     
     new.x[[i]]$code = paste( code(x[groups[[i]]]), collapse="+")
   }
+  x = add_spline(x)
   new.x
 }
 
@@ -48,8 +49,8 @@ average_replicates = function(x) {
 # methods is either a list of functions (e.g, created one created with `c()`)
 # or a single function
 transform.well = function(x, methods, ...) {
-  if(length(methods)==1) return( methods(x,...) )
-  for( m in methods ) x = m(x, ...)
+  if(length(methods)==1) return( do.call( methods, list(x,...) ) )
+  for( m in methods ) x = do.call( m, list(x,...) )
   return(x)
 }
 transform.wellList = transform.well

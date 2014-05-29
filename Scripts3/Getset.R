@@ -348,23 +348,3 @@ solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
