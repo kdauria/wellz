@@ -40,7 +40,7 @@ x = select(wells, "HUVEC & TcdA", ID="toxinAdd", controls=TRUE)
 x = transform(x, c("tcenter","normalize"), ID="toxinAdd")
 x = add_smoother(x, method="composite", window.width=15/60)
 #plot(x)
-plot(x[3:6], smoother=TRUE, xlim=c(-1,4), points=TRUE, deriv=1, color="concentration", ID="toxinAdd", discrete=FALSE)
+plot(x[3:6], xlim=c(-1,4), points=TRUE, deriv=1, color="concentration", ID="toxinAdd" )
 
 
 y = transform(x, c(tcenter, normalize, slice), ID="toxinAdd", xlim=c(-1,5))

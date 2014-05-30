@@ -47,7 +47,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   # Add diagnostic annotations if requested
   base.plot$data = data
   text = diagnostic_lines(x, base.plot+ribbon, diagnostic)
-  
+    
   return(base.plot + title + points + text + ribbon + line + spline + gg.smoother)
 }
 
