@@ -1,0 +1,13 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{}
+
+\documentclass{article}
+
+\begin{document}
+
+
+
+
+
+
+\end{document}

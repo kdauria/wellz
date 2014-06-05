@@ -135,6 +135,10 @@ ID.wellList = function(x) lapply(x,ID)
   x
 }
 
+# Get the string that uniquely identifies a well
+well_key = function(x) UseMethod("key", x)
+well_key.well = function(x) paste(filename(x),code(x))
+
 ######## "volume"
 volume = function(x,...) UseMethod("volume",x)
 volume.Solution = function(x) x$volume

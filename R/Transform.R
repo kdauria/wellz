@@ -31,7 +31,10 @@ average_replicates = function(x) {
     value.list = vector(mode="list",length=length(groups[[i]]))
     value.list[[1]] = new.x[[i]]$data$value
     
-    interp = function(x) x$spline( new.x[[i]]$data$t )
+    interp = function(x) {
+      if( length(x$spline)==0 ) stop(well_key(x), " has no spline")
+      x$spline( tdata(new.x[[i]]) )
+    }
     value.list[2:length(groups[[i]])] = lapply( x[other.wells], interp )
     
     value.table = as.data.table(value.list)

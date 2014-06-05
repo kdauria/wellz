@@ -1,6 +1,6 @@
 
 # Wrapper function
-parse_metadata = function( metadata, data.dir, parse_fun ) {
+parse_metadata = function( metadata, data.dir=NULL, parse_fun=NULL, spline=!is.null(parse_fun) ) {
 
   # Parse the metadata
   message("Parsing metadata")
@@ -10,7 +10,7 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
   
   # Add solutions of different "actions" to get status of well
   for( i in seq_along(wells) ) {
-    for( j in 2:length(wells[[i]]$actions)) {
+    for( j in seq(2, length.out=length(wells[[i]]$actions)-1)) {
       wells[[i]]$actions[[j]]$solution = 
         `+.Solution`(s1 = wells[[i]]$actions[[j-1]]$solution,
                      s2 = wells[[i]]$actions[[j]]$solution,
@@ -19,13 +19,16 @@ parse_metadata = function( metadata, data.dir, parse_fun ) {
   }
   
   # Add the data to the wells
-  wells = add_data(wells, data.dir, parse_fun )
+  if(!is.null(parse_fun)) wells = add_data(wells, data.dir, parse_fun )
+  
+  if(spline) {
+    message("Adding interpolating splines")
+    wells = add_spline(wells)
+  }
   
   # Add an interpolating spline to all the wells
-  message("Adding interpolating splines")
   #for( i in seq_along(wells))
   #  wells[[i]]$spline = splinefun( x=wells[[i]]$data$t, y=wells[[i]]$data$value, method="monoH.FC" )
-  wells = add_spline(wells)
   
   return(wells)
 }

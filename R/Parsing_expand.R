@@ -26,13 +26,11 @@ expand_code = function(code) {
   letter.parts = sub(".*?([A-Z][-]?[A-Z]?).*", "\\1", codes)
   code.lets = lapply(letter.parts,expand_letters)
   
-  number.parts = sub(".*?([0-9][-]?[0-9]?).*", "\\1", codes)
+  number.parts = sub(".*?([0-9]+\\-?[0-9]+).*", "\\1", codes)
   code.nums = lapply(number.parts,expand_numbers)
   
   c(unlist( mapply(function(x,y) outer(x,y,FUN=paste0), 
                    code.lets, code.nums) ))
 }
-
-
 
 
