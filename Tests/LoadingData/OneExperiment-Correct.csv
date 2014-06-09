@@ -1,8 +1,0 @@
-file	wells	ID	i	rmVol	adVol	name	conc	type	solvent
-CHO.txt	A-H1-2	start	0	0	100	-	-	-	media
-	A-H1-2	cellSeed	2	0	100	CHO	9000	total	
-	A-H1-2	move1	285	0	0	-	-	-	
-	A-H1-2	mediaReplace	307	100	100	-	-	-	
-	B1, F2	toxinAdd	611	0	22.2	-	-	-	
-	A1, C-H1					TcdA	1000, 100, 1, 0.1, 0.01, 0.001, 0.0001	afterMix	
-	A-E2, G-H2					TcdB			

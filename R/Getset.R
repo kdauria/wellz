@@ -123,7 +123,14 @@ for( i in seq_along(x)) {
   x
 }
 
-####### "index# or "time" of an action
+#' Index of an action
+#' 
+#' Gives the index or indices of actions or actions
+#' in a action or actionList object
+#' 
+#' @param x action or actionList object
+#' @importFrom Rcpp cppFunction
+#' @export
 index = function(x) UseMethod("index",x)
 index.action = function(x) x[["i"]]
 index.actionList = function(x) index_actionList_rcpp(x)
@@ -138,17 +145,37 @@ cppFunction('
             }
             return out;
             }')
+
+
+#' Index of an action
+#' 
+#' Sets the index or indices of actions or actions
+#' in a action or actionList object
+#' 
+#' @param x action or actionList object
 "index<-" = function(x,value) UseMethod("i<-",x)
 "index<-.action" = function(x,value) x[["i"]] = value
 "index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
 
 
-######### "ID" of actions
+#' ID/name of action(s)
+#' 
+#' Returns the names of the actions for an action, actionList, well, or wellList
+#' 
+#' @param x action, actionList, well, or wellList object
+#' @export
 ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
 ID.actionList = function(x) vapply(x,"[[","","ID")
 ID.well = function(x) sapply(x$actions, ID)
 ID.wellList = function(x) lapply(x,ID)
+
+
+#' ID/name of action(s)
+#' 
+#' Sets the names of the actions for an action, actionList, well, or wellList
+#' 
+#' @param x action, actionList, well, or wellList object
 "ID<-" = function(x,value) UseMethod("ID<-",x)
 "ID<-.action" = function(x,value) x[["ID"]] = value
 "ID<-.actionList" = function(x,value) { 
@@ -157,50 +184,135 @@ ID.wellList = function(x) lapply(x,ID)
   x
 }
 
-# Get the string that uniquely identifies a well
-well_key = function(x) UseMethod("key", x)
+#' Unique key of a well
+#' 
+#' Combines the filename and code of a well to give a unique key
+#' 
+#' @param x a well object
 well_key.well = function(x) paste(filename(x),code(x))
 
-######## "volume"
+#' Volume of a solution
+#' 
+#' Returns the volume of a Solution object. If given a well
+#' or wellList, it defaults to the last action. Otherwise, different
+#' solutions can be specified by passing arguments to the solution
+#' function (the ... arguments)
+#' 
+#' @param x a well object
+#' @param ... passed to solution
 volume = function(x,...) UseMethod("volume",x)
 volume.Solution = function(x) x$volume
 volume.well = function(x, ...) solution(x, ...)$volume
 volume.wellList = function(x, ...) sapply(x, volume, ...)
 
-# Take the index for a data point and give the time
+#' Get time given index
+#' 
+#' Given a well and the i'th data point (the index), give the
+#' corresponding time
+#' 
+#' @param x well object
+#' @param i the index, an integer
 i_t = function(x, ...) UseMethod("i_t", x)
 i_t.default = function(x, ...) return(NA)
 i_t.well = function(x, i) wdata(x)$t[ match(i, wdata(x)$i) ]
 
-# Take the index for a data point and give the value
+#' Get value given index
+#' 
+#' Given a well and the i'th data point (the index), give the
+#' corresponding value
+#' 
+#' @param x well object
+#' @param i the index, an integer
 i_v = function(x, ...) UseMethod("i_v", x)
 i_v.default = function(x, ...) return(NA)
 i_v.well = function(x, i) wdata(x)$value[ match(i, wdata(x)$i) ]
 
-# Accessor to data of a well
+#' Get a well's data
+#' 
+#' Extract the data matrix from a well. The matrix contains
+#' three columns: i, t, and value indicating the indices, times, and values
+#' 
+#' @param x well object
+#' @export
 wdata = function(x, ...) UseMethod("wdata",x)
 wdata.well = function(x) x$data
+
+#' Change a well's data
+#' 
+#' Change the data for a well. The matrix contains
+#' three columns: i, t, and value indicating the indices, times, and values
+#' 
+#' @param x well object
 "wdata<-" = function(x, ...) UseMethod("wdata<-",x)
 "wdata<-.well" = function(x, value) { x$data = value ; x }
 
+#' Get the times for a well's data points
+#' 
+#' Extract a numeric vector of the times from well's data.
+#' 
+#' @param x well object
+#' @export
 tdata = function(x, ...) UseMethod("tdata", x)
 tdata.well = function(x) wdata(x)$t
+
+#' Change the times for a well's data points
+#' 
+#' Given a numeric vector of the times from well's data, update
+#' the data. This is usefull for time transformations.
+#' 
+#' @param x well object
+#' @export
 "tdata<-" = function(x, ...) UseMethod("tdata<-",x)
 "tdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "t", value); x}
 
+#' Get the data values for a well
+#' 
+#' Extract a numeric vector of the values from a well's data.
+#' The times and indices aren't given.
+#' 
+#' @param x well object
+#' @export
 vdata = function(x, ...) UseMethod("vdata", x)
 vdata.well = function(x) wdata(x)$value
+
+#' Set the data values for a well
+#' 
+#' Use a numeric vector to set the values of a well
+#' 
+#' @param x well object
+#' @export
 "vdata<-" = function(x, ...) UseMethod("vdata<-",x)
 "vdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "value", value); x}
 
+#' Get the indices for a well's data
+#' 
+#' Extract a numeric vector of the indices from a well's data.
+#' 
+#' @param x well object
+#' @export
 idata = function(x, ...) UseMethod("idata", x)
 idata.well = function(x) wdata(x)$i
+
+#' Set the indices for a well's data
+#' 
+#' Use a numeric vector to change the indices of a well's data.
+#' 
+#' @param x well object
+#' @export
 "idata<-" = function(x, ...) UseMethod("idata<-",x)
 "idata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "i", value); x}
 
-# Get the index at which an ID happened
-# If the ID isn't given, then all of the times
-# with the ID's as the name
+#' Get index from action name
+#' 
+#' Given the name of an action and a well, return the index
+#' at which the action occurred (or right before the action occurred).
+#' The ID of the action is passed to action or actionList with the
+#' ... arguments. If the ID isn't given, 
+#' then a named numeric vector is returned where the names are the
+#' names of the actions and the values are the indices.
+#' 
+#' @param x action, actionList, well, or wellList
+#' @param ... arguments passed to action or actionList
 ID_i = function(x,...) UseMethod("ID_i", x)
 ID_i.default = function(x, ...) return(NA)
 ID_i.action = function(x, ...) action(x, ...)$i
@@ -208,7 +320,18 @@ ID_i.actionList = function(x, ...) sapply( actionList(x, ...), ID_i )
 ID_i.well = function(x, ...) sapply( actionList(x, ...), ID_i )
 ID_i.wellList = function( x, ... ) sapply(x, ID_i, ... )
 
-# Get the time at which an ID happened
+
+#' Get times from action name
+#' 
+#' Given the name of an action and a well, return the time
+#' at which the action occurred (or right before the action occurred).
+#' The ID of the action is passed to action or actionList with the
+#' ... arguments. If the ID isn't given, 
+#' then a named numeric vector is returned where the names are the
+#' names of the actions and the values are the times.
+#' 
+#' @param x action, actionList, well, or wellList
+#' @param ... arguments passed to ID_i
 ID_t = function(x,...) UseMethod("ID_t", x)
 ID_t.default = function(x, ...) return(NA)
 ID_t.well = function(x, ...) i_t(x, ID_i(x, ...))
