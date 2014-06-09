@@ -1,0 +1,14 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Vignette 1}
+
+\documentclass{article}
+
+\begin{document}
+
+\section{Section 1}
+This is some text...
+
+
+
+\end{document}
+

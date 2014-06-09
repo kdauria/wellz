@@ -45,17 +45,15 @@ c.actionList= function(x,...) {
 #         Simple, fast accessors of well information        #
 #############################################################
 
-## Different types of accessor functions:
-# code
-# filename
-# index
-# solution
-# actionList
-# ID
-# volume
-
-
-##### "code" or "location"
+#' Get the unique identifier(s) of one or more wells
+#' 
+#' This function gives the "code" or the string
+#' that gives the location or identifier of a well
+#' No two wells can have the same "code".
+#' 
+#' @importFrom Rcpp cppFunction
+#' @param x well or wellList
+#' @export
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]
 code.wellList = function(x) code_rcpp(x)
@@ -69,6 +67,15 @@ cppFunction('
             out[i] = as<std::string>(temp["code"]);
             }
             return out;  }')
+
+#' Set the unique identifier(s) of one or more wells
+#' 
+#' This function sets the "code" or the string
+#' that gives the location or identifier of a well
+#' No two wells can have the same "code".
+#' 
+#' @param x well or wellList
+#' @param value a character vector
 "code<-" = function(x,value) UseMethod("code<-",x)
 "code<-.well" = function(x,value) x[["code"]] = value
 "code<-.wellList" = function(x,value) {
@@ -78,7 +85,14 @@ cppFunction('
   x
 }
 
-######### "file" or "filename"
+#' Data filenames of wells
+#' 
+#' Returns the name of the file(s) containing
+#' the data for each well in the input
+#' 
+#' @importFrom Rcpp cppFunction
+#' @param x well or wellList
+#' @export
 filename = function(x) UseMethod("filename",x)
 filename.well = function(x) x[["file"]]
 filename.wellList = function(x) filename_rcpp(x)
@@ -92,6 +106,14 @@ cppFunction('
             out[i] = as<std::string>(temp["file"]);
             }
             return out;  }')
+
+#' Data filenames of wells
+#' 
+#' Sets the name of the file(s) containing
+#' the data for each well in the input
+#' 
+#' @param x well or wellList
+#' @param value a character vector
 "filename<-" = function(x,value) UseMethod("filename<-",x)
 "filename<-.well" = function(x,value) x[["file"]] = value
 "filename<-.wellList" = function(x,value) {

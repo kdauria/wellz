@@ -1,0 +1,15 @@
+Package: wellz
+Title: Organizing and visualizing multi-well biological data
+Description: 
+Version: 0.1
+Author: Kevin D'Auria <kdauria@gmail.com>
+Maintainer: Kevin D'Auria <kdauria@gmail.com>
+License: Unknown
+Depends:
+    R (>= 3.1.0)
+Imports:
+    knitr,
+    Rcpp
+URL: 
+VignetteBuilder: knitr
+LazyData: true
