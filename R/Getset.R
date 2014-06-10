@@ -1,17 +1,3 @@
-
-# select wells based off of the search.wellList function
-select = function(x, ...) UseMethod("select",x)
-select.wellList = function(wells, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)]
-}
-"select<-" = function(x, ...) UseMethod("select<-",x)
-"select<-.wellList" = function(wells, value, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)] = value
-  wells
-}
-
 #' Subset a wellList
 #' 
 #' Custom function so that subsetting does not lose class

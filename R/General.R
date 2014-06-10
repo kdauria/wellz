@@ -1,14 +1,25 @@
-# Make the names of a list the elements
-# and the elements the names
+#' Invert list names and elements
+#' 
+#' Consider a list as a map. 
+#' The "keys" of a list (actually the \code{names()}) are mapped
+#' to values. This function reverses that mapping, making a
+#' list where the \code{names()} become the values and the values
+#' become the \code{names()}
+#' 
+#' @param x a \code{list} object
 invert_list = function(x) {
   split( rep(names(x),times=sapply(x,length)),
          unlist(x) )
 }
 
-# Take a vector of numbers and make a string
-# describing them. For instance, the numbers
-# 1,2,3,4,10,11,15,17,18 become
-# 1-4, 10-11, 15, 17-18
+#' String of number ranges
+#' 
+#' Take a vector of numbers and make a string
+#' describing them. For instance, the numbers
+#' \code{c(1,2,3,4,10,11,15,17,18)} becomes
+#' \code{"1-4, 10-11, 15, 17-18"}.
+#' 
+#' @param x a numeric vector
 text_ranges = function(x) {
   right = c( which( diff(x)!=1 ), length(x) )
   left = c(1, right[-length(right)]+1)
@@ -20,9 +31,12 @@ text_ranges = function(x) {
   paste(ranges,collapse=", ")
 }
 
-# Custom number format for numbers above/below 1
-# If >1, require two decimal places
-# If <1, require two significant digits
+#' Format numbers above/below 1 differently
+#' 
+#' If >=1, require two decimal places.
+#' If <1, require two significant digits
+#' 
+#' @param x a numeric vector
 format1 = function(x) {
   .local = function(x) {
     if( is.na(x) ) {
@@ -36,11 +50,15 @@ format1 = function(x) {
   sapply(x,.local)
 }
 
-# Custom paste function that returns NA
-# if the input is NULL or if all inputs are NA
-# Removes all arguments that are NA (though doesn't
-# remove the argument if it is a vector that is not all NA's)
-# Also removes NULL arguments before the call to paste
+#' Custom wrapper around \code{paste}
+#' 
+#' Custom paste function that returns \code{NA}
+#' if the input is \code{NULL} or if all inputs are \code{NA}.
+#' Removes all arguments that are NA (though does not
+#' remove the argument if it is a vector that is not all \code{NA}s).
+#' Removes NULL arguments before the call to paste.
+#' 
+#' @param ... like a call to \code{paste}
 paste2 = function(...) {
   args = list(...)
   #print(args)
@@ -62,13 +80,20 @@ paste2 = function(...) {
   }
 }
 
-# A very specific function, but one I use more than once
-# This takes a list of character vectors
-# unique=TRUE means that only the unique characters are returned
-# unique=FALSE means that the characters for each list element are returned in a vector
-#    the same length as the list
-# collapse=TRUE means that 2+-character list elements are concatenated into one string
-# collapse=FASE means that a list of character vectors is returned
+
+#' summarizing a list of character vectors
+#' 
+#' A very specific function, but one I use more than once
+#' This takes a list of character vectors
+#' \code{unique=TRUE} means that only the unique characters are returned
+#' \code{unique=FALSE} means that the characters for each list element are returned in a vector
+#'    the same length as the list.
+#' \code{collapse=TRUE} means that 2+-character list elements are concatenated into one string.
+#' \code{collapse=FASE} means that a list of character vectors is returned
+#' 
+#' @param l a \code{list} of character vectors
+#' @param collapse a \code{logical}
+#' @param unique a \code{logical}
 list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
   if( !collapse && !unique ) {
     out = l
@@ -82,10 +107,18 @@ list_concat_str = function( l, collapse=TRUE, unique=TRUE) {
   return(out)
 }
 
-# Checks if something is a character of length 1
+#' is character length one
+#' 
+#' is character length one
+#' 
+#' @param x a \code{character}
 is_char_len1 = function(x) is.character(x) && length(x)==1
 
-# A special row function meant to be fast
+#' standard deviation of rows
+#' 
+#' This is much faster than using an \code{apply} type function.
+#' 
+#' @param x a matrix
 rowSD = function(x) {
   mat = as.matrix(x)
   m = nrow(mat)
@@ -94,8 +127,15 @@ rowSD = function(x) {
 }
 
 
-# insert n linearly interpolated numbers into a vector
-# that can only be as close as min.dx
+#' Insert NA values
+#' 
+#' Insert n NA value between each element of a numeric
+#' vector.
+#' 
+#' @param x numeric vector
+#' @param n number of NA values in between each element
+#' @param the smallest spacing allowed between values if
+#'           the \code{NA}s were linearly interpolated
 insert_na_between = function(x, n, min.dx=NULL, ... ) {
   if( !is.null(min.dx)) {
     n_bw = pmax(0, pmin( floor(diff(x)/min.dx)-1, n ) )
@@ -107,6 +147,12 @@ insert_na_between = function(x, n, min.dx=NULL, ... ) {
   }
   return(out)
 }
+
+#' Interpolate \code{NA} values
+#' 
+#' Fill in \code{NA} values by linear interpolation
+#' 
+#' @param x numeric vector
 na_interp = function(x) {
   return( approx(x, xout=1:length(x))$y )
 }

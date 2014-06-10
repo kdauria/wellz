@@ -1,5 +1,3 @@
-
-
 #' Solvent names
 #' 
 #' This gets the names of the solvents. By default, the last
@@ -13,7 +11,7 @@
 #' together into a single string. If collapse=FALSE, a character vector is returned.
 #' 
 #' @param x Solution, well, or wellList
-#' @param ... ID passed to solution, unique, and collapse described below
+#' @param ... ID passed to solution; unique, and collapse described below
 #' @export
 solvent_names = function(x,...) UseMethod("solvent_names",x)
 solvent_names.default = function(x,...) return(NA)
@@ -25,9 +23,22 @@ solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   return(out)
 }
 
-######## "compound_names" of compounds in a solution, well, or wellList
-# NA is returned if an action with ID (see compound_names.well and solution)
-# does not exist
+
+#' Compound names
+#' 
+#' This gets the names of the compounds By default, the last
+#' action of well is used to get the solution (ID="last"). If
+#' ID is given but an action with that ID doesn't exist, NA is returned.
+#' For a wellList, there are four possible types of return values
+#' based on the unique and collapse arguments. unique=TRUE indicates
+#' that all the compound names will be condensed into a vector of only
+#' unique compound names. If unique=FALSE, then a list is returned (the length equal to
+#' length(x) ). collapse=TRUE indicates that the compound names will be concatenated
+#' together into a single string. If collapse=FALSE, a character vector is returned.
+#' 
+#' @param x Solution, well, or wellList
+#' @param ... ID passed to solution; unique, and collapse described below
+#' @export
 compound_names = function(x,...) UseMethod("compound_names",x)
 compound_names.default = function(x,...) return(NA)
 compound_names.Solution = function(x, type="all" ) {
@@ -47,7 +58,37 @@ compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
 }
 
 
-######## "concentration" of a well, wellList
+#' @title Concentration of well(s)
+#' 
+#' @description
+#' Returns the contents of wells depending on requested parameters (e.g., ID
+#' or compound name).
+#' 
+#' @details
+#' For Solution objects, a compound can be requested with the
+#' compound argument. This argument must be a character variable of length
+#' one. If compound=NULL (the default), the concentrations
+#' are concatenated into a string of the form 
+#' "compoundName1-12.34, compoundName2-56.7, compoundName3-8.9".
+#' If compound does not exist in the Solution, 0 is returned.
+#' The \code{type} argument can specify to search for compounds
+#' of type "start" or "total" or to search "all" compounds.
+#' 
+#' For well objects, the default is to use the solution
+#' of the last action of the well (\code{ID="last"}). \code{ID} can be specified in
+#' to choose another solution. If \code{ID} does not specify an action,
+#' \code{NA} is returned. \code{compound} and \code{type} can also be specified.
+#' 
+#' For wellList objects, if all the wells contain the same one compound
+#' at different concentrations, then a numeric vector is returned.
+#' A numeric vector is also returned if the \code{compound} is specified
+#' as an argument. Otherwise, a vector of strings is returned as described
+#' above for Solution objects. The last solution is used unless \code{ID}
+#' is specified.
+#' 
+#' @param x Solution, well, or wellList
+#' @param ... \code{ID} passed to solution; \code{compound} described below
+#' @export
 concentration = function(x,...) UseMethod("concentration", x)
 concentration.default = function(x, ...) return(NA)
 concentration.Solution = function( x, compound=NULL, type="start" ) {
@@ -80,7 +121,38 @@ concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   sapply( x, concentration, compound=compound, type=type, ... )
 }
 
-######## "solvent_percentages" of a well, wellList
+
+
+
+#' @title Solvent composition of well(s)
+#' 
+#' @description
+#' Returns the solvent percentages of wells depending on requested parameters (e.g., ID
+#' or solvent name).
+#' 
+#' @details
+#' For Solution objects, a solvent can be requested with the
+#' \code{solvent} argument. This argument must be a character variable of length
+#' one. If \code{solvent=NULL} (the default), the concentrations
+#' are concatenated into a string of the form 
+#' "solventName1-25.0, solventName2-30.0, solventName3-45.0.
+#' If \code{solvent} does not exist in the Solution, 0 is returned.
+#' 
+#' For well objects, the default is to use the solution
+#' of the last action of the well (\code{ID="last"}). \code{ID} can be specified in
+#' to choose another solution. If \code{ID} does not specify an action,
+#' \code{NA} is returned. \code{solvent} can also be specified.
+#' 
+#' For wellList objects, if all the wells contain the same one solvent
+#' at different concentrations, then a numeric vector is returned.
+#' A numeric vector is also returned if the \code{solvent} is specified
+#' as an argument. Otherwise, a vector of strings is returned as described
+#' above for \code{Solution} objects. The last solution is used unless \code{ID}
+#' is specified.
+#' 
+#' @param x Solution, well, or wellList
+#' @param ... \code{ID} passed to solution; \code{solvent} described below
+#' @export
 solvent_percentages = function(x, ...) UseMethod("solvent_percentages",x)
 solvent_percentages.default = function(x, ...) return(NA)
 solvent_percentages.Solution = function(x, solvent=NULL, ...) {

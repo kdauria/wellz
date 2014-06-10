@@ -1,3 +1,18 @@
+
+# select wells based off of the search.wellList function
+select = function(x, ...) UseMethod("select",x)
+select.wellList = function(wells, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)]
+}
+"select<-" = function(x, ...) UseMethod("select<-",x)
+"select<-.wellList" = function(wells, value, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)] = value
+  wells
+}
+
+
 #### Find wells that match the requested parameters
 search = function(x,...) UseMethod("search",x)
 search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",controls=FALSE) {
