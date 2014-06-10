@@ -1,17 +1,28 @@
-# Melts a wellList with parameters
-# See melt_wellList and param_matrix for more info
-# melt_wellList_params(x, color="concentration", 
-#                      size=1:7, shape="file", linetype="file")
+#' Melt a wellList with parameters
+#' 
+#' First, the wells are melted with \code{melt_wellList}. Additional
+#' ID variables are added to the melted \code{data.table} from
+#' the \code{...} arguments that are passed to \code{param_matrix} (which
+#' are then eventually passed to \code{group})
+#' 
+#' @param x a \code{wellList} object
+#' @param ... passed to \code{param_matrix(x, ...)}
+#' @import data.table
 melt_wellList_params = function(x, ...) {
   dt = melt_wellList(x)
   p = param_matrix(x, ...)
   dt[p] # a join
 }
 
-# Take the data from all the wells in a well list
-# and melt it so that one measurement is on
-# every row. The well and file for the measurement
-# are indicated in the loc and file columns
+#' Melt well data
+#' 
+#' Melt the data of many wells in a wellList to one
+#' \code{data.table} where the ID variables are the
+#' file and location of the well. The measured variables
+#' are the times and data values for the wells.
+#' 
+#' @param x a \code{wellList object}
+#' @import data.table
 melt_wellList = function(x) {
   l = lapply(x, "[[", "data")
   dt = rbindlist(l)
@@ -24,16 +35,32 @@ melt_wellList = function(x) {
   dt
 }
 
-# Expands plot arguments that are meant for group.wellList
-# These will be the arguments that are characters of length one
-# The output is a two-element list
-# The first elemen (aes) is the aesthetic that will be used
-# in ggplot2
-# The second output is a data.table that contains the
-# aesthetic information for each well (one row per well)
-# This data.table will be joined with a large data matrix
-# to make a final data.table that will be input into ggplot
-# param_matrix(x, color="concentration", size=1:7, shape="file", linetype="file")
+#' Parameter matrix of wells
+#' 
+#' Make a matrix of well characteristics/parameters where each
+#' row is for one well.
+#' 
+#' The first two columns of the matrix will be the file
+#' and location of the well, which is enough to uniquely identify
+#' it. Any further columns are specified in the \code{...} arguments.
+#' These names of these arguments can only be 
+#' \code{"color"}, \code{"linetype"}, \code{"size"}, \code{"alpha"},
+#' \code{"shape"}, or {"fill"} (see \code{check_well_params()}).
+#' The values of these arguments can only be 
+#' \code{"location"}, \code{"file"}, \code{"volume"}, \code{"compound"},
+#' \code{"concentration"}, \code{"solvent"}, or \code{"solvent.percentages"}.
+#' This is because the values are passed to \code{group()}.
+#' The name of the column will be the name of the argument and the
+#' values of the column will be set to the vector from \code{group}.
+#' The output is actually a \code{data.table}, not a \code{matrix}.
+#' 
+#' @import data.table
+#' @param x a \code{wellList} object
+#' @param ... passed to the \code{by} argument in \code{group}
+#' @param type passed to \code{group}
+#' @param ID passed to \code{group}
+#' @param compound passed to \code{group}
+#' @param solvent passed to \code{group}
 param_matrix = function( x, ..., type="start", ID="last", compound=NULL, solvent=NULL ) {
 
   check_well_params( x, ...)
@@ -61,9 +88,21 @@ param_matrix = function( x, ..., type="start", ID="last", compound=NULL, solvent
   params
 }
 
-# Make an aesthetic for ggplot2 from the wellList object
-# and optional parameters (see param_expand and check_well_params)
-# well_aes(x, color="concentration", size=1:7, shape="file", linetype="file")
+
+#' aes object for wellList
+#' 
+#' Make an aes object to be used by \code{ggplot2} from the
+#' named arguments in \code{...}.
+#' 
+#' The aesthetics are limited to certain types (see 
+#' \code{check_well_params}).
+#' 
+#' @param x a \code{wellList} object
+#' @param ... the aesthetics
+#' @param type ignored
+#' @param ID ignored
+#' @param compound ignored
+#' @param solvent ignored
 well_aes = function(x, ..., type="start", ID="last", compound=NULL, solvent=NULL) {
   args = list(...)
   check_well_params( x, ...)
@@ -83,8 +122,25 @@ well_aes = function(x, ..., type="start", ID="last", compound=NULL, solvent=NULL
   aes.out
 }
 
-# Check if the inputs for the plotting function are allowed
-# Automatic parameters will eventually be input into group.wellList
+
+#' Check well parameters
+#' 
+#' This is principally an argument validation function
+#' called by other functions.
+#' It checks that the parameters that describe a well and the parameters that
+#' will eventually be used for a plot are allowed within this framework.
+#' 
+#' Named arguments must be one of 
+#' \code{"color"}, \code{"linetype"}, \code{"size"}, \code{"alpha"},
+#' \code{"shape"}, or {"fill"}. Their values must be one 
+#' \code{"location"}, \code{"file"}, \code{"volume"}, \code{"compound"},
+#' \code{"concentration"}, \code{"solvent"}, or \code{"solvent.percentages"}.
+#' Alternatively, the values can be an atomic vector the same length
+#' as the number of wells in the \code{wellList}. The function aises an error
+#' if the arguments are not valid. Otherwise, it returns \code{TRUE}.
+#' 
+#' @param x a \code{wellList} object
+#' @param ... parameters and aesthetics
 check_well_params = function( x, ... ) {
   
   args = list(...)

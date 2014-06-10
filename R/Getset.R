@@ -51,7 +51,7 @@ c.actionList= function(x,...) {
 #' data frame with columns that are enough to uniquely
 #' identify each row. A convenience function
 #' 
-#' @param wellList object
+#' @param wells wellList object
 roster = function(wells) {
   data.frame( file=filename(wells), location=code(wells) ) 
 }

@@ -6,7 +6,7 @@
 roster(wells)
 }
 \arguments{
-\item{wellList}{object}
+\item{wells}{wellList object}
 }
 \description{
 data frame with columns that are enough to uniquely
