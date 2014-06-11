@@ -1,5 +1,18 @@
-# Read the data using the fread function from data.table
-# and attache the data to the well objects
+#' Add data to a well or wells
+#' 
+#' A wrapper that moves data from a file and parsing function
+#' to well objects
+#' 
+#' \code{parse_fun} must take one input, the filepath of a
+#' data file. It must return a data frame where the first
+#' column is named "t" and contains the times at which data
+#' were recorded. The other columns must have the same names
+#' as the locations of the well. These names are used to assign
+#' that column's data to the appropriate well in a \code{wellList} object.
+#' 
+#' @param wells wellList object
+#' @param data.dir the root directory for the data files
+#' @param parse_fun a function that parses the data files
 add_data = function(x,...) UseMethod("add_data",x)
 add_data.wellList = function( wells, data.dir, parse_fun ) {
 
@@ -29,6 +42,13 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
   wells
 }
 
+#' Parse RTCA data
+#' 
+#' A parsing function to be used by \code{add_data}. The
+#' type of file it parses is from right clicking on the plot
+#' in the typical RTCA xCelligence plot and saving in List format
+#' 
+#' @param filepath filepath of csv file exported from RTCA software
 parse_rtca = function(filepath) {
   dat = fread(filepath)
   dat[,"Time-Interval":=NULL,with=FALSE]

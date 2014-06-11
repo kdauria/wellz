@@ -29,8 +29,11 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   gg.smoother = add_smoother_to_plot( x, nbw=nbw, min.dx=min.dx, 
                                      smoother=smoother, discrete=discrete, maes=maes, args=args, deriv=deriv)
   
-  # Melt the data into ggplot format
+  # If the derivative is requested, then it wouldn't make sense to show
+  # the original data. The data must be changed to the derivative
   if(deriv>0 && smoother) x = insert_n_between_spline(x=x,deriv=deriv,type="smoother",n=0)
+  
+  # Melt the data into ggplot format
   data = do.call( melt_wellList_params, c(list(x),args) )
 
   # Base plot and the data

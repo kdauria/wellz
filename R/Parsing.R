@@ -1,5 +1,60 @@
-
-# Wrapper function
+#' @title Parse metadata file of well actions
+#' 
+#' @description
+#' The metadata file must be of a csv file of a specific format. This wrapper
+#' function calls several other functions that creates a \code{wellList} object.
+#' 
+#' @details
+#' In order, the column headers of the file must be
+#' \code{"file"}, \code{"wells"}, \code{"ID"}, \code{"i"},
+#' \code{"rmVol"}, \code{"adVol"}, \code{"name"}, \code{"conc"},
+#' \code{"type"}, and \code{"solvent"}.
+#' 
+#' Empty cells of the csv file are filled with the next
+#' non-empty cell above. The \code{wells} column is for the
+#' location of the well. The location is a combination of a letter
+#' (indicating the row on the plate) and a number (the column
+#' on the plate). For example, "D3" would be the well in
+#' fourth row and third column of a plate. 
+#' Shorthand is allowed for the \code{well} column.
+#' For example, \code{"A-B1-2, F3-4"} would
+#' expand to \code{c("A1","A2","B1","B2","F3","F4")} (see \code{expand_code} for
+#' details).
+#' 
+#' The ID labels the row as an \code{action} that is being performed
+#' right before or at the same time that data point \code{i} is collected.
+#' \code{rmVol} and \code{adVol} are the volume removed and added, respectively,
+#' for the action.
+#' 
+#' \code{name}, \code{conc}, and \code{type} columns refer to the compounds
+#' in the solution added in this action. If nothing but solvent was added,
+#' then all columns can be filled with a hyphen ("-"). Each compound must
+#' be entered on a separate row. If there are more than two compounds in
+#' an action (in one solution), then simply make sure that all other
+#' columns are the same (or blank). The code will identify this as a solution
+#' with multiple compounds. \code{type} identifies different ways that
+#' solutions can be combined or will be tracked. \code{type="start"} means
+#' that the given value is the concentration before the solution is added
+#' to the well (at the start). \code{type="final"} means that this will
+#' be the concentration of the well after \code{rmVol} is removed and
+#' \code{adVol} is added. \code{type="total"} is the total count of some
+#' substance in the solution (e.g., the total number of cells or beads);
+#' a compount of type "total" is treated specially in that it's "concentration"
+#' never changes with changing volume.
+#' 
+#' For the \code{solvent} column, only one solvent can be given
+#' for each action. Complicated mixtures must be referred to
+#' by a simple name (e.g., "media" or "broth").
+#' 
+#' The \code{parse_fun} argument must parse a data file and return
+#' a data.frame where the column names are the locations of the wells, and the
+#' first column contains the times for each data point. The name of this first
+#' column must be "t".
+#' 
+#' @param data.dir the root directory for the data files
+#' @param parse_fun function that parses data files and returns data matrix
+#' @param spline logical indicating to add a spline or not
+#' 
 parse_metadata = function( metadata, data.dir=NULL, parse_fun=NULL, spline=!is.null(parse_fun) ) {
 
   # Parse the metadata
@@ -28,18 +83,30 @@ parse_metadata = function( metadata, data.dir=NULL, parse_fun=NULL, spline=!is.n
   
   # Add an interpolating spline to all the wells
   #for( i in seq_along(wells))
-  #  wells[[i]]$spline = splinefun( x=wells[[i]]$data$t, y=wells[[i]]$data$value, method="monoH.FC" )
+  #  wells[[i]]$spline = splinefun( x=tdata(wells[[i]]), y=vdata(wells[[i]]), method="monoH.FC" )
   
   return(wells)
 }
 
-# Read the data into R
+#' Raw parse well metadata
+#' 
+#' A wrapper for \code{read.csv} for metadata files
+#' 
+#' @param metadata file path for the metadata file
+#' @param data.dir directory of the data files
 read_metadata = function( metadata, data.dir, sep="\t" ) {
   read.csv(file=metadata,header=TRUE,sep=sep,
                stringsAsFactors=FALSE,strip.white=TRUE)
 }
 
-# Fill in empty cells with the value from above column
+
+#' fill empty cells of metadata file
+#' 
+#' If a cell from metadata file is empty, fill it
+#' with the value from the next non-empty cell above it.
+#' If a cell is "-", then change it to \code{NA}.
+#' 
+#' @param x metadata file
 fillblanks_metadata = function(x) {
   x[x==""] = NA
   x = na.locf(x)
@@ -47,7 +114,17 @@ fillblanks_metadata = function(x) {
   x
 }
 
-# Expand comma-separated shorthand
+#' Expand a metadata row
+#' 
+#' If a row in a metadata file has shorthand for
+#' applying the same action to several wells, this
+#' function expands those rows are repeated for each well. The
+#' location of the wells are expanded with \code{expand_code}.
+#' All other columns are checked if they have comma separated values.
+#' If there is such a column, it's values are separated among
+#' each of the new rows.
+#' 
+#' @param df a \code{data.frame} holding all the rows for for one action
 expand_action = function( df ) {
   codes = expand_code( df$wells )
   nc = nrow(df) # number of compounds
@@ -67,13 +144,28 @@ expand_action = function( df ) {
   newdf
 }
 
-# Set some columns to be numeric
+#' Change metadata column classes
+#' 
+#' By default, the metadata is parsed in as all strings. This changes
+#' columns with names in \code{numeric.cols} to numeric type variables.
+#' 
+#' @param meta.df a \code{data.frame} of all the metadata (see \code{parse_metadata})
+#' @param numeric.cols the names of columns to make numeric
 colclasses_metadata = function(meta.df, numeric.cols=c("i","rmVol","adVol","conc") ) {
   meta.df[,numeric.cols] = apply(meta.df[,numeric.cols],2,as.numeric)
   meta.df
 }
 
-# Convert the metadata to wells
+
+#' Convert metadata data.frame to wellList
+#' 
+#' This is the large wrapper function that does most of the
+#' grunt work for converting metadata to \code{Solution}, 
+#' \code{action}, \code{actionList}, \code{well}, and \code{wellList}
+#' wellList. This should eventually be refactored so that there
+#' are constructors for each of these objects.
+#' 
+#' @param meta.df the metadata in a \code{data.frame} (see \code{parse_metadata})
 metadata_to_wells = function( meta.df ) {
   
   # Figure out how many actions and in what rows they start
