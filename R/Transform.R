@@ -5,11 +5,11 @@
 # The averaged wells contains the means of all replicates
 # interpolated to one the same time points. The
 # standard deviation is also saved in the data frame
-average_replicates = function(x) {
+average_replicates = function(x, ID="last") {
   # group the wells by their solutions to find repilcates
-  welldescrip = interaction( concentration(x, type="all", ID="last"),
-                             solvent_percentages(x, ID="last"),
-                             volume(x,ID="last") )
+  welldescrip = interaction( concentration(x, type="all", ID=ID),
+                             solvent_percentages(x, ID=ID),
+                             volume(x,ID=ID) )
   group.ids = as.numeric(welldescrip)
   
   # Find the reference well for each group and make a new wellList
