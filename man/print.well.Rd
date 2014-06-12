@@ -3,7 +3,7 @@
 \alias{print.well}
 \title{Print well object}
 \usage{
-print.well(well)
+\method{print}{well}(well)
 }
 \arguments{
 \item{well}{a \code{well} object}

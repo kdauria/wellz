@@ -3,7 +3,7 @@
 \alias{print.wellList}
 \title{Print \code{wellList} object}
 \usage{
-print.wellList(wells, printall = FALSE, ID = "last")
+\method{print}{wellList}(wells, printall = FALSE, ID = "last")
 }
 \arguments{
 \item{wells}{a \code{wellList} object}
