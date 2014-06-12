@@ -1,3 +1,14 @@
+#' Print \code{wellList} object
+#' 
+#' Print the basic information of a \code{wellList} object.
+#' If there are less than 32 wells, than a data.frame is printed
+#' with a summary of compounds for each well
+#' If there are more, than the number of wells in each data file
+#' is displayed
+#' 
+#' @param wells a \code{wellList} object
+#' @param printall print concentration of all wells even if there are >32 wells
+#' @param ID the action and solution in each well with which to summarize the action
 print.wellList = function( wells, printall=FALSE, ID="last" ) {
   
   files = filename(wells)
@@ -36,6 +47,12 @@ print.wellList = function( wells, printall=FALSE, ID="last" ) {
   }
 }
 
+#' Print well object
+#' 
+#' Print the file, location, summary of actions, and
+#' summary of the last action
+#' 
+#' @param well a \code{well} object
 print.well = function( well ) {
   
   cat("File:", well$file, "\n")
@@ -54,6 +71,12 @@ print.well = function( well ) {
   }
 }
 
+#' Print Solution object
+#' 
+#' Print volume, compounds, solvents, and concentrations of 
+#'   a solution
+#'   
+#' @param soln a \code{Solution} object
 print.Solution = function( soln ) {
   cat("Volume: ", soln$volume, "\n")  
   if( length(compound_names(soln)) ) cat( compound_string(soln), "\n" )
@@ -86,9 +109,16 @@ print.actionList = function( actionlist ) {
 
 
 
-####### Helper functions ##########
+####### Helper functions 
 
-# summarise the compounds and concentrations into one string
+
+#' Summarize Solution compounds in one string
+#' 
+#' Concatenates the names and concentrations of all compounds
+#' 
+#' @param soln a \code{Solution} object
+#' @param type the "type" of concentration, either \code{"start"}, 
+#'           \code{"total"}, or \code{"all"}
 compound_string = function(soln, type="all", wConc=TRUE ) {
   
   yn = switch(type,
@@ -107,13 +137,27 @@ compound_string = function(soln, type="all", wConc=TRUE ) {
   }
   out
 }
+
+
+#' Summarize Solution solvents in one string
+#' 
+#' Concatenates the names and percentages of all solvents
+#' 
+#' @param soln a \code{Solution} object
 solvent_string = function(soln) {
   if( nrow(soln$solvent)==0 ) return ("")
   paste0( soln$solvent$perc, "% ", soln$solvent$name, collapse=", " )
 }
 
-# Print only a few rows of a data.frame
-# Similar to print.data.table
+
+#' Print abbreviated view of well data
+#' 
+#' This shows the first and last 5 rows of data so
+#'   that the screen doesn't fill with numbers in
+#'   other print functions. This was inspired by
+#'   \code{print.data.table}.
+#'   
+#' @param data a \code{data.frame}
 print_well_data = function(data) {
   if( nrow(data) > 10 ) {
     top = data[1:5,]
