@@ -1,19 +1,43 @@
-
-# select wells based off of the search.wellList function
-select = function(x, ...) UseMethod("select",x)
-select.wellList = function(wells, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)]
-}
-"select<-" = function(x, ...) UseMethod("select<-",x)
-"select<-.wellList" = function(wells, value, ...) {
-  yn = search(wells, ...)
-  wells[which(yn)] = value
-  wells
-}
-
-
-#### Find wells that match the requested parameters
+#' @title Search a wellList for certain wells
+#' 
+#' @description
+#' This function takes several parameters (see arguments) and 
+#' returns wells that match \emph{all} of the arguments.
+#' 
+#' @details
+#' The \code{filename} and \code{code} arguments are the most straightforward.
+#' Wells with the matching filenames or codes/locations are found.
+#' \code{controls=TRUE} also finds wells with no compounds, only solvent.
+#' 
+#' The \code{compstr} argument (the COMPound STRing) is the most flexible.
+#' It parses a string describing one or more concentrations and returns
+#' wells that meet those requirements. This is best described by example.
+#' For instance, the string \code{"CompoundA"} will return all
+#' wells that have "CompoundA". Next, the concentration of compounds
+#' can be set. For instance, \code{"CompoundA [10]"} will find wells
+#' with CompoundA at a concentration of 10. \code{"CompoundA [10-1000]"}
+#' will find all wells with CompoundA at or above a concentration of 10 and at or
+#' below a concentration of 1000. The logical operaturs \code{&}, \code{|}, and
+#' \code{!} can be used in front of compound names. For instance,
+#' \code{"CompoundA [10-1000] & !CompoundB"} will find all wells with
+#' CompoundA between the specificed concnetrations that also do
+#' not have CompoundB.
+#' 
+#' \code{ID} specifies the name of the action (and so the Solution)
+#'  to look for in each well. If an action with the name does not exist,
+#'  \code{NA} is the result.
+#'
+#' The final output from matching all of these compounds is a
+#' logical vector the same length as the number of wells in 
+#' the \code{wellList} object. The \code{TRUE} elements indicate
+#' which well met the required parameters
+#' 
+#' @param x a \code{wellList} object
+#' @param compstr a string used to search for compounds
+#' @param filename a string
+#' @param code a string
+#' @param ID a string
+#' @param controls a \code{logical}
 search = function(x,...) UseMethod("search",x)
 search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",controls=FALSE) {
   
@@ -35,19 +59,38 @@ search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",cont
 }
 
 
-# Tests
-# t1 = "TcdA"
-# t2 = "TcdA OR TcdB"
-# t3 = "TcdA AND TcdB"
-# t4 = "TcdA [1-100]"
-# t5 = "TcdA[1-100]"
-# t6 = "TcdA[1]"
-# t7 = "TcdA [1-100] OR TcdB [1-10]"
-# t8 = "TcdA AND TcdB [1-10]"
-# t9 = "TcdA AND TcdB OR IL8"
+#' Select wells given parameters
+#' 
+#' Returns the subset of wells matching the given
+#' parameters. The parameters are specified in the
+#' \code{...} arguments which are passed to \code{search}.
+#' 
+#' @param x a \code{wellList} object
+#' @param ... passed to \code{search}
+select = function(x, ...) UseMethod("select",x)
+select.wellList = function(wells, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)]
+}
+"select<-" = function(x, ...) UseMethod("select<-",x)
+"select<-.wellList" = function(wells, value, ...) {
+  yn = search(wells, ...)
+  wells[which(yn)] = value
+  wells
+}
 
-# Parses a concentration string and returns a list
-# with the names and bounds of each compound.
+
+#' Parses string for finding compounds
+#' 
+#' See \code{search} for a description of what the
+#' "compound string" (\code{comp.str} here) can be.
+#' The output here is a 3-column data.frame.
+#' First column is the name of the compound; second
+#' is the lower bound of the concnetration; third is the
+#' upper bound. These names and bounds are then used to search
+#' for wells that match these requirements.
+#' 
+#' @param comp.str see \code{search} for description of the string format
 parse_comp_str = function( comp.string ) {
   # get string between each boolean operator
   sp = "[[:space:]]*"
@@ -56,7 +99,7 @@ parse_comp_str = function( comp.string ) {
   matches = str_match_all(comp.string, pattern)[[1]]
   comps = gsub("[[:space:]]","",matches)
   
-  # split the names and concenctrations of each string
+  # split the names and concentrations of each string
   comp = lapply( comps, function(x) strsplit(x,"\\s*\\[\\s*")[[1]])
   
   # get the compound name in each string
@@ -80,9 +123,27 @@ parse_comp_str = function( comp.string ) {
   return( bounds.df )
 }
 
-# Take a concentration string (s) and the results
-# from parse_comp_str (bounds) to to see if the string
-# is selecting the well
+#' Find wells from string
+#' 
+#' This determines if a \code{well} object matches the parameters
+#' in a string describing desired compounds
+#' and concentrations. See \code{search} for a description of the 
+#' required string format. The \code{ID} specifies which action and Solution
+#' that will be used to define the well. The bounds of the concentrations
+#' and compounds are parsed into a data frame with \code{parse_comp_str}.
+#' See that function's documentation for more details. This function additionally
+#' takes care of any logical operators in the string. It does this by evaluating
+#' each compound/concentration parameter separately to \code{TRUE} or \code{FALSE}.
+#' These logicals are then used to replace the corresponding part of the string
+#' and the string is then evaluated as if it were regular R syntax. Because of the
+#' regular expressions used here, one should be very careful using any
+#' R functions. This function has only been tested with \code{|}, code{&}, and \code{!}.
+#' 
+#' @param well a \code{well} object
+#' @param s string describing desired compounds
+#'            and concentrations (see \code{search})
+#' @param bounds an output of the same form as the output of \code{parse_comp_str(s)}
+#' @param ID which action/Solution to use
 match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
 
   out = logical(nrow(bounds))
