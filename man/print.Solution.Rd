@@ -3,7 +3,7 @@
 \alias{print.Solution}
 \title{Print Solution object}
 \usage{
-\method{print}{Solution}(soln)
+print.Solution(soln)
 }
 \arguments{
 \item{soln}{a \code{Solution} object}
