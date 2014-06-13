@@ -5,8 +5,42 @@
 
 \begin{document}
 
-\section{Section 1}
-This is some text...
+\section{Data structures}
+
+The code is based on physical objects. 
+
+The information that
+describes a solution (compounds, concentrations, and solvents)
+are stored in a \texttt{Solution} object.
+
+Since a well can be modified at different times throughout
+an experiment, the states of that well are saved
+in \texttt{action} objects that contain the time the action
+was performed and the \texttt{Solution} object describing the
+state of that well.
+
+A well's \texttt{action} objects are stored in an \texttt{actionList}
+object.
+
+A \texttt{well} object contains an \texttt{actionList} as well
+as the well's location, path to it's data file, as well as a matrix
+or data frame that holds the data. Other functions such as 
+data smoothers or splines specific to that well may also be stored
+in a \texttt{well} object.
+
+A \texttt{wellList} object holds multiple \texttt{well} objects.
+
+\section{Loading or generating well data and annotations}
+
+\subsection{Create well list from CSV annotation file}
+
+A \texttt{wellList} object may be generated from an annotation file. This
+is easiest to explain by example.
+
+\subsection{Create well list programatically}
+
+
+
 
 
 

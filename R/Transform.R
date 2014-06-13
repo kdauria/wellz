@@ -1,10 +1,18 @@
-
-# Average wells with the same solutions as determined
-# by their compound concentrations, solvent percentages,
-# and volume.
-# The averaged wells contains the means of all replicates
-# interpolated to one the same time points. The
-# standard deviation is also saved in the data frame
+#' Average replicate wells
+#' 
+#' Wells are considered replicates if their solutions
+#' in the action specified by \code{ID} are the same.
+#' In other words, replicates will have the same volume,
+#' compounds and concentrations, and solvent composition.
+#' Replicates are merged by concatenating their location
+#' strings with a "+". Their data are merged using one
+#' of the well's spline functions. A new \code{wellList}
+#' object is returned. For instance, if there are 6 wells
+#' where the are three duplicate pairs, then the output
+#' will contain three wells.
+#' 
+#' @param x a \code{wellList} object
+#' @param ID which action to refer to
 average_replicates = function(x, ID="last") {
   # group the wells by their solutions to find repilcates
   welldescrip = interaction( concentration(x, type="all", ID=ID),
@@ -47,10 +55,19 @@ average_replicates = function(x, ID="last") {
   new.x
 }
 
-
-###### Finally create a generic function for the transformations
-# methods is either a list of functions (e.g, created one created with `c()`)
-# or a single function
+#' general data transformation function
+#' 
+#' This is mainly a wrapper for several other transformation functions.
+#' This function allows many to be called at once using the 
+#' \code{methods} argument. 
+#' 
+#' This \code{methods} argument may be a character vector
+#' or a list of functions. The strings can be 
+#' \code{"tcenter"}, \code{"normalize"}, \code{"slice"},
+#' or \code{"level"}.
+#' 
+#' @param x a \code{well} object
+#' @param methods a character vector or list of functions
 transform.well = function(x, methods, ...) {
   if(length(methods)==1) return( do.call( methods, list(x,...) ) )
   for( m in methods ) x = do.call( m, list(x,...) )
@@ -58,7 +75,14 @@ transform.well = function(x, methods, ...) {
 }
 transform.wellList = transform.well
 
-######## Time centering
+#' Time-center the data
+#' 
+#' Center the data at a point identified by the action
+#' named \code{ID}. Return a well list with the time-transformed
+#' data.
+#' 
+#' @param x a \code{well} or \code{wellList} object
+#' @param ... the \code{ID} can be set
 tcenter = function(x,...) UseMethod("tcenter",x)
 tcenter.well = function(x, ID="last", ...) {
   centered.time = ID_t(x, ID=ID, ...)
@@ -72,7 +96,14 @@ tcenter.wellList = function(x, ...) {
   x
 }
 
-######## Normalize to a point in time
+
+#' Normalize well data
+#' 
+#' Normalize the data in a well to the time
+#' of some action named \code{ID}.
+#' 
+#' @param x a \code{well} or \code{wellList} object
+#' @param ... the \code{ID} can be set
 normalize = function(x, ...) UseMethod("normalize", x)
 normalize.well = function(x, ID="last", ...) {
   norm.val = ID_v(x, ID=ID)
@@ -86,7 +117,14 @@ normalize.wellList = function(x, ...) {
   x
 }
 
-####### Slice a piece of time
+
+#' Slice in time of well data
+#' 
+#' Only keep data that is within the bounds
+#' of \code{xlim}, a two-element numeric vector.
+#' 
+#' @param x a \code{well} or \code{wellList} object
+#' @param ... ignored
 slice = function(x, ...) UseMethod("slice", x)
 slice.well = function(x, xlim, ...) {
   wdata(x) = wdata(x)[ tdata(x) > xlim[1] & tdata(x) < xlim[2], ]
@@ -99,7 +137,15 @@ slice.wellList = function(x, ...) {
   x
 }
 
-###### Level to a point in time
+#' Level well data
+#' 
+#' "Level" the data in a well to the time
+#' of some action named \code{ID}. In other words,
+#' all other data values will be in reference to the difference
+#' to that point in time.
+#' 
+#' @param x a \code{well} or \code{wellList} object
+#' @param ... the \code{ID} can be set
 level = function(x, ...) UseMethod("level", x)
 level.well = function(x, ID="last", ...) {
   norm.val = ID_v(x, ID=ID)
