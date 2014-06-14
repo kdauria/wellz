@@ -30,6 +30,13 @@ in a \texttt{well} object.
 
 A \texttt{wellList} object holds multiple \texttt{well} objects.
 
+\subsubsection{Solution object}
+example
+
+\subsubsection{action object}
+example
+
+
 \section{Loading or generating well data and annotations}
 
 \subsection{Create well list from CSV annotation file}

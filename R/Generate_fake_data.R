@@ -55,6 +55,29 @@ mdata = melt( data.wtime, id.vars="t" )
 colnames(mdata) = c("t","loc","value")
 ggplot(mdata, aes(x=t, y=value, group=loc)) + geom_line()
 
+# Now need to make constructors so that csv files aren't so necessary
+
+
+
+
+
+Well = function( file=NULL, location=NULL, 
+                 actionList=NULL, action=NULL, Solution=NULL,
+                 compounds=NULL, concentrations=NULL )
+
+
+
+# Constructor for Solution
+
+Solution = function( compounds=NULL, solvents=NULL, volume=0) {
+  
+}
+
+
+
+# Then need easy ways to automatically make
+
+
 
 
 
