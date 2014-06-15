@@ -90,12 +90,10 @@ print.actionList = function( actionlist ) {
   out$i = index(actionlist)
   out$rmVol = sapply(actionlist,"[[","rmVol")
   
-  # Subtract solutions to figure out what was added
-  # at each action
-  solns = get_solution(actionlist)
-  if(length(solns)>1) 
-    solns[-1] = Map("-.Solution",solns[-1], solns[-length(solns)], out$rmVol[-1])
-  
+  # EDIT!!! Solutions are no longer subtracted from another
+  # Instead, a different actionList, the $states will be saved as
+  # part of the wellList
+  solns = get_solution(actionlist)  
   
   out$adVol = sapply(solns,"[[","volume")
   out$compounds = vapply( solns, compound_string, "" )

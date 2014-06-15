@@ -245,6 +245,20 @@ ActionList = function( actions=NULL,
 #' Any more complicated well objects will require the more complex
 #' Solution, action, and actionList objects to be made beforehand with their
 #' associated constructors.
+#' 
+#' @param file
+#' @param location
+#' @param actionList
+#' @param ...
+#' 
+#' @examples
+#' # A blank well object
+#' Well()
+#' 
+#' 
+
+aa = ActionList(ID=c("a","b"),i=1:2,rmVol=c(0,30),solutions=list(Solution(volume=90),Solution()))
+
 Well = function( file=NA, location=NA, 
                  actionList=NULL, ...) {
   
@@ -261,6 +275,19 @@ Well = function( file=NA, location=NA,
   class(well) = c("well","list")
   return(well)
 }
+
+#' Constructor for a wellList object
+#' 
+#' A \code{wellList} object is just a \code{list} of well objects.
+#' The only purpose of having the \code{wellList} class is so that
+#' generic functions that can be applied to \code{wellList} objects.
+#' It also provides a nice structure so that any further
+#' restrictions (e.g., well locations must be unique) can be
+#' ensured.
+#' 
+#' 
+
+
 
 
 ###### Helper functions
