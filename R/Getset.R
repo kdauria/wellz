@@ -74,17 +74,8 @@ well_key.well = function(x) paste(filename(x),code(x))
 #' @export
 code = function(x) UseMethod("code",x)
 code.well = function(x) x[["code"]]
-code.wellList = function(x) code_rcpp(x)
-cppFunction('
-  CharacterVector code_rcpp( List x ) {
-            List temp;
-            unsigned int n=x.size(), i;
-            CharacterVector out(n);
-            for( i = 0; i<n ; i++ ) {
-            temp = as<List>(x[i]);
-            out[i] = as<std::string>(temp["code"]);
-            }
-            return out;  }')
+code.wellList = function(x) sapply(x, code)
+
 
 #' Set the unique identifier(s) of one or more wells
 #' 
@@ -113,17 +104,8 @@ cppFunction('
 #' @export
 filename = function(x) UseMethod("filename",x)
 filename.well = function(x) x[["file"]]
-filename.wellList = function(x) filename_rcpp(x)
-cppFunction('
-  CharacterVector filename_rcpp( List x ) {
-            List temp;
-            unsigned int n=x.size(), i;
-            CharacterVector out(n);
-            for( i = 0; i<n ; i++ ) {
-            temp = as<List>(x[i]);
-            out[i] = as<std::string>(temp["file"]);
-            }
-            return out;  }')
+filename.wellList = function(x) sapply(x, filename)
+
 
 #' Data filenames of wells
 #' 

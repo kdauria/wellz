@@ -242,7 +242,7 @@ ActionList = function( actions=NULL,
 #' be created, where the action will contain the solution generated
 #' from the ... arguments and the \code{Solution} constructor.
 #' 
-#' Any more complicated well objects will require the more complex
+#' More complicated well objects will require the more complex
 #' Solution, action, and actionList objects to be made beforehand with their
 #' associated constructors.
 #' 
@@ -255,16 +255,21 @@ ActionList = function( actions=NULL,
 #' # A blank well object
 #' Well()
 #' 
+#' # A well made from an actionList
+#' actionList = ActionList(ID=c("a","b"), 
+#'                         i=1:2,rmVol=c(0,30),
+#'                         solutions=list(Solution(volume=90), Solution()))
+#' Well(actionList=actionList)
 #' 
-
-aa = ActionList(ID=c("a","b"),i=1:2,rmVol=c(0,30),solutions=list(Solution(volume=90),Solution()))
-
+#' # A well by passing ... to Solution()
+#' Well(compound.names=c("A","B"),concentrations=c(10,100))
 Well = function( file=NA, location=NA, 
                  actionList=NULL, ...) {
   
   well = list( file=file, code=location )
   
   if( !is.null(actionList) ) {
+    stopifnot( "actionList" %in% class(actionList) )
     well$actions = actionList
   } else {
     soln = Solution(...)
@@ -285,8 +290,68 @@ Well = function( file=NA, location=NA,
 #' restrictions (e.g., well locations must be unique) can be
 #' ensured.
 #' 
+#' Since a \code{wellList} is just a list of \code{well} objects, the easiest way 
+#' to create a \code{wellList} object is to supply a list of \code{well} objects
+#' to the \code{wells} argument.
 #' 
+#' If well objects are not available, then this constructor only
+#' allows for only very simple well objects to be quickly generated.
+#' More complicated well objects with multiple actions and compounds
+#' will have to be first made with the corresponding constructors.
+#' 
+#' If simple well objects are OK, then the way it's done is supplying
+#' emph{n}-length vectors that will be used to create \code{Solution}
+#' objects and one-action \code{actionList} objects for each well.
+#' The \emph{n}-length vectors will be in the \code{file} and \code{location} (well-level parameters);
+#' the \code{ID}, \code{rmVol}, and \code{i} (action-level parameters);
+#' and the \code{volume}, \code{compound.names}, \code{concentrations},
+#' \code{compound.types}, \code{solvent.names}, and \code{solvent.percs} (solution-level parameters)
+#' arguments.
+#' 
+#' @examples
+#' # An empty wellList
+#' WellList()
+#' 
+#' # 2-well wellList
+#' WellList(compound.names=c("A","B"))
+#' 
+#' # 10-well wellList
+#' WellList(location=1:10, volume=11:20)
+WellList = function( wells=NULL,
+                     file=NULL, location=NULL, # well-level parametrs
+                     ID=NULL, rmVol=NULL, i=NULL, # action-level parameters
+                     volume=NULL, compound.names=NULL, concentrations=NULL,
+                     compound.types=NULL,
+                     solvent.names=NULL, solvent.percs=NULL # solution-level parameters
+                     ) {
+  
+  if(!is.null(wells)) {
+    if( !all(sapply(wells, function(x) "well" %in% class(x))) ) {
+      stop("the 'wells' argument must be a list of well objects")
+    }
+  } else {
+    args = as.list(environment())
+    args$wells = NULL
+    params = as.data.frame_with_nulls(args)
+    n.wells = nrow(params)
+    if(n.wells==0) return( structure(list(),class=c("wellList","list")) )
+    
+    wells = vector(mode="list",length=n.wells)
+    for( ii in 1:n.wells ) {
+      params.i = params[ii,]
+      soln = with(params.i, Solution( volume=volume, compound.names=compound.names,
+                                  concentrations=concentrations, compound.types=compound.types,
+                                  solvent.names=solvent.names, solvent.percs=solvent.percs ) )
+      action = with(params.i, Action(ID=ID, rmVol=rmVol, i=i))
+      actionList = ActionList( actions=list(action) )
+      well = with(params.i, Well(file=file, location=location, actionList=actionList))
+      wells[[ii]] = well
+    }
+  }
 
+  class(wells) = c("wellList","list")
+  return(wells)
+}
 
 
 

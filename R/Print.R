@@ -32,7 +32,8 @@ print.wellList = function( wells, printall=FALSE, ID="last" ) {
     # Add "ditto"s for repeated rows
     if(nrow(out)>1) {
       for( i in nrow(out):2 ) {
-        out[ i, out[i,] == out[i-1,] ] = "-"
+        repeated.cols = out[i,] == out[i-1,] | (is.na(out[i,]) & is.na(out[i-1,]))
+        out[ i, repeated.cols ] = "-"
       }
     }
     print(out)
