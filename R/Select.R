@@ -147,7 +147,7 @@ parse_comp_str = function( comp.string ) {
 match_well_string = function( well, s, bounds = parse_comp_str(s), ID="last" ) {
 
   out = logical(nrow(bounds))
-  sn = solution(well,ID=ID)
+  sn = get_solution(well,ID=ID)
   if( length(sn)==1 && is.na(sn) ) return(FALSE)
   
   # figure out which part of the bounds are satisfied

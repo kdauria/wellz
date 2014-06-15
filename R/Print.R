@@ -23,7 +23,7 @@ print.wellList = function( wells, printall=FALSE, ID="last" ) {
     out = list()
     out$file = files
     out$loc = code(wells)
-    solns = lapply(wells, function(x) solution(x,ID=ID))
+    solns = lapply(wells, function(x) get_solution(x,ID=ID))
     out$compounds = sapply(solns, compound_string, type="start")
     out$compounds[ sapply(solns,is.null) ] = paste0("No ", ID, " ID")
     out$total = sapply(solns, compound_string, type="total", wConc=FALSE)
@@ -62,7 +62,7 @@ print.well = function( well ) {
   
   cat("\n\n")
   cat("Final solution:\n")
-  print( solution(well,ID="last") )
+  print( get_solution(well,ID="last") )
   
   if(length(well$data)!=0) {
     cat("\n\n")
@@ -92,7 +92,7 @@ print.actionList = function( actionlist ) {
   
   # Subtract solutions to figure out what was added
   # at each action
-  solns = solution(actionlist)
+  solns = get_solution(actionlist)
   if(length(solns)>1) 
     solns[-1] = Map("-.Solution",solns[-1], solns[-length(solns)], out$rmVol[-1])
   
@@ -101,7 +101,7 @@ print.actionList = function( actionlist ) {
   out$compounds = vapply( solns, compound_string, "" )
   out$solvent = vapply( solns, solvent_string, "" )
   if( length(unique(out$solvent))==1 ) out$solvent=NULL
-  if( all(out$rmVol==0) ) out$rmVol=NULL
+  if( all(out$rmVol==0 | is.na(out$rmVol)) ) out$rmVol=NULL
   
   out = as.data.frame(out)
   print(out,row.names=FALSE)

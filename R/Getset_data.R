@@ -118,9 +118,9 @@ i_v.well = function(x, i) wdata(x)$value[ match(i, wdata(x)$i) ]
 #' @param ... arguments passed to action or actionList
 ID_i = function(x,...) UseMethod("ID_i", x)
 ID_i.default = function(x, ...) return(NA)
-ID_i.action = function(x, ...) action(x, ...)$i
-ID_i.actionList = function(x, ...) sapply( actionList(x, ...), ID_i )
-ID_i.well = function(x, ...) sapply( actionList(x, ...), ID_i )
+ID_i.action = function(x, ...) get_action(x, ...)$i
+ID_i.actionList = function(x, ...) sapply( get_actionList(x, ...), ID_i )
+ID_i.well = function(x, ...) sapply( get_actionList(x, ...), ID_i )
 ID_i.wellList = function( x, ... ) sapply(x, ID_i, ... )
 
 

@@ -16,7 +16,7 @@
 solvent_names = function(x,...) UseMethod("solvent_names",x)
 solvent_names.default = function(x,...) return(NA)
 solvent_names.Solution = function(x, ...) x$solvent$name
-solvent_names.well = function(x, ID="last", ... ) solvent_names(solution(x, ID="last", ...))
+solvent_names.well = function(x, ID="last", ... ) solvent_names(get_solution(x, ID="last", ...))
 solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, solvent_names, ...)
   out = list_concat_str( nms, unique=unique, collapse=collapse )
@@ -49,7 +49,7 @@ compound_names.Solution = function(x, type="all" ) {
   }
 }
 compound_names.well = function(x, type="start", ID="last", ...) {
-  compound_names( solution(x, ID=ID, ...), type=type )
+  compound_names( get_solution(x, ID=ID, ...), type=type )
 }
 compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, compound_names, ...)
@@ -109,7 +109,7 @@ concentration.Solution = function( x, compound=NULL, type="start" ) {
   return(out)
 }
 concentration.well = function(x, compound=NULL, ID="last", type="start", ... ) {
-  concentration(solution(x, ID=ID, ... ), type=type, compound=compound )
+  concentration(get_solution(x, ID=ID, ... ), type=type, compound=compound )
 }
 concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   
@@ -170,7 +170,7 @@ solvent_percentages.Solution = function(x, solvent=NULL, ...) {
   return(out)
 }
 solvent_percentages.well = function(x, solvent=NULL, ID="last", ... ) {
-  solvent_percentages( solution(x, ID=ID, ...), solvent=solvent )
+  solvent_percentages( get_solution(x, ID=ID, ...), solvent=solvent )
 }
 solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
   

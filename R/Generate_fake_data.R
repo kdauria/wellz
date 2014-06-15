@@ -1,7 +1,7 @@
+
+.local = function() {
 library(ggplot2)
 library(reshape)
-
-
 
 n = 16 # number of wells
 
@@ -40,7 +40,7 @@ half.life = c( 1000, 1000, 100, 100, 10, 10,
 r = -log(2)/half.life # rate of decay
 num.cells = unlist(data[ t>50, ][1, 1:12]) # number of cells at 50 hours
 
-# Let's say that the perurbation was added at t.perturb hours
+# Lets say that the perurbation was added at t.perturb hours
 t.perturb = c(rep(50,6),rep(55,6))
 params = data.frame( P = num.cells, r = r )
 for( i in 1:nrow(params) ) {
@@ -60,31 +60,7 @@ ggplot(mdata, aes(x=t, y=value, group=loc)) + geom_line()
 
 
 
-
-Well = function( file=NULL, location=NULL, 
-                 actionList=NULL, action=NULL, Solution=NULL,
-                 compounds=NULL, concentrations=NULL )
-
-
-
-# Constructor for Solution
-
-Solution = function( compounds=NULL, solvents=NULL, volume=0) {
-  
 }
-
-
-
-# Then need easy ways to automatically make
-
-
-
-
-
-
-
-
-
 
 
 

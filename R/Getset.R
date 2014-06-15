@@ -184,7 +184,7 @@ cppFunction('
 #' @export
 ID = function(x) UseMethod("ID",x)
 ID.action = function(x) x[["ID"]]
-ID.actionList = function(x) vapply(x,"[[","","ID")
+ID.actionList = function(x) sapply(x, function(y) y$ID)
 ID.well = function(x) sapply(x$actions, ID)
 ID.wellList = function(x) lapply(x,ID)
 
@@ -197,7 +197,7 @@ ID.wellList = function(x) lapply(x,ID)
 "ID<-" = function(x,value) UseMethod("ID<-",x)
 "ID<-.action" = function(x,value) x[["ID"]] = value
 "ID<-.actionList" = function(x,value) { 
-  for(i in seq_along(x)) x[[i]][["code"]] = value[i]
+  for(i in seq_along(x)) x[[i]][["ID"]] = value[i]
   names(x) = value
   x
 }
@@ -213,7 +213,7 @@ ID.wellList = function(x) lapply(x,ID)
 #' @param ... passed to solution
 volume = function(x,...) UseMethod("volume",x)
 volume.Solution = function(x) x$volume
-volume.well = function(x, ...) solution(x, ...)$volume
+volume.well = function(x, ...) get_solution(x, ...)$volume
 volume.wellList = function(x, ...) sapply(x, volume, ...)
 
 
@@ -227,15 +227,15 @@ volume.wellList = function(x, ...) sapply(x, volume, ...)
 #' 
 #' @param x action, actionList, well, or wellList
 #' @param ... ID argument optional, eventually passed to action
-solution = function(x,...) UseMethod("solution",x)
-solution.default = function(x, ...) return(NA)
-solution.action = function(x) x$solution
-solution.actionList = function(x,ID=NA) {
-  if( is.na(ID) ) return( lapply(x, solution) )
-  return( solution(action(x, ID)) )
+get_solution = function(x,...) UseMethod("get_solution",x)
+get_solution.default = function(x, ...) return(NA)
+get_solution.action = function(x) x$solution
+get_solution.actionList = function(x,ID=NA) {
+  if( is.na(ID) ) return( lapply(x, get_solution) )
+  return( get_solution(get_action(x, ID)) )
 }
-solution.well = function(x, ...) solution( actionList(x), ...)
-solution.wellList = function(x, ID="last") lapply(x, solution, ID)
+get_solution.well = function(x, ...) get_solution( get_actionList(x), ...)
+get_solution.wellList = function(x, ID="last") lapply(x, get_solution, ID)
 
 
 #' Change solution(s) of a well
@@ -260,19 +260,19 @@ solution.wellList = function(x, ID="last") lapply(x, solution, ID)
 #' 
 #' @param x action, actionList, well, or wellList
 #' @param ... ID argument optional
-action = function(x, ...) UseMethod("action", x)
-action.action = function(x, ID=NA, ...) {
+get_action = function(x, ...) UseMethod("get_action", x)
+get_action.action = function(x, ID=NA, ...) {
   if(is.na(ID) || ID==x$ID ) return(x)
   return(NA)
 }
-action.actionList = function(x, ID="last", ...) {
+get_action.actionList = function(x, ID="last", ...) {
   if( ID=="last" ) return( x[[length(x)]] )
   if( length(ID)!=1 ) stop("ID argument must be of length 1")
   if( !(ID %in% ID(x)) ) return(NA)
   return( x[[ID]] )
 }
-action.well = function(x, ...) action( actionList(x), ... )
-action.wellList = function(x, ... ) lapply( x, action, ... )
+get_action.well = function(x, ...) get_action( get_actionList(x), ... )
+get_action.wellList = function(x, ... ) lapply( x, get_action, ... )
 
 #' Get actionsLists from well(s)
 #' 
@@ -283,15 +283,16 @@ action.wellList = function(x, ... ) lapply( x, action, ... )
 #' 
 #' @param x actionList, well, or wellList
 #' @param ... ID argument optional
-actionList.actionList = function(x, ID=NULL, ...) {
+get_actionList = function(x, ...) UseMethod("get_actionList",x)
+get_actionList.actionList = function(x, ID=NULL, ...) {
   if(is.null(ID)) return(x)
   if(ID=="last") return(x[length(x)])
   matched.ids = ID[ ID %in% ID(x) ]
   if(length(matched.ids)==0) return(NA)
   x[matched.ids]
 }
-actionList.well = function(x, ...) actionList(x$actions, ...)
-actionList.wellList = function(x, ...) lapply(x,actionList, ...)
+get_actionList.well = function(x, ...) get_actionList(x$actions, ...)
+get_actionList.wellList = function(x, ...) lapply(x,get_actionList, ...)
 
 
 #' Change actionsLists of well(s)
