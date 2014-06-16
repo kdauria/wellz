@@ -45,9 +45,9 @@
 #'          \code{total}, or \code{all})
 #' @param compound the name of the compound to look at
 #' @param solvent the name of the solvent to look at
-
-
+#' @export
 group = function(x,...) UseMethod("group",x)
+#' @export
 group.wellList = function(x, by="location", ID="last", 
                           type="start", compound=NULL, solvent=NULL ) {
   

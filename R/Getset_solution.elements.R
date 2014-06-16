@@ -14,9 +14,13 @@
 #' @param ... ID passed to solution; unique, and collapse described below
 #' @export
 solvent_names = function(x,...) UseMethod("solvent_names",x)
+#' @export
 solvent_names.default = function(x,...) return(NA)
+#' @export
 solvent_names.Solution = function(x, ...) x$solvent$name
+#' @export
 solvent_names.well = function(x, ID="last", ... ) solvent_names(get_solution(x, ID="last", ...))
+#' @export
 solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, solvent_names, ...)
   out = list_concat_str( nms, unique=unique, collapse=collapse )
@@ -40,7 +44,9 @@ solvent_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
 #' @param ... ID passed to solution; unique, and collapse described below
 #' @export
 compound_names = function(x,...) UseMethod("compound_names",x)
+#' @export
 compound_names.default = function(x,...) return(NA)
+#' @export
 compound_names.Solution = function(x, type="all" ) {
   if( type=="all" ) {
     return( x$compound$name )
@@ -48,9 +54,11 @@ compound_names.Solution = function(x, type="all" ) {
     return( x$compounds$name[ x$compounds$type==type ] )
   }
 }
+#' @export
 compound_names.well = function(x, type="start", ID="last", ...) {
   compound_names( get_solution(x, ID=ID, ...), type=type )
 }
+#' @export
 compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
   nms = lapply(x, compound_names, ...)
   out = list_concat_str(nms, unique=unique, collapse=collapse)
@@ -90,7 +98,9 @@ compound_names.wellList = function(x, unique=TRUE, collapse=TRUE, ...) {
 #' @param ... \code{ID} passed to solution; \code{compound} described below
 #' @export
 concentration = function(x,...) UseMethod("concentration", x)
+#' @export
 concentration.default = function(x, ...) return(NA)
+#' @export
 concentration.Solution = function( x, compound=NULL, type="start" ) {
   
   # if the concentration for a single compound is requested, return a numeric
@@ -108,9 +118,11 @@ concentration.Solution = function( x, compound=NULL, type="start" ) {
   out = paste(comp.rows$name, format1(comp.rows$conc), sep="-", collapse=", ")
   return(out)
 }
+#' @export
 concentration.well = function(x, compound=NULL, ID="last", type="start", ... ) {
   concentration(get_solution(x, ID=ID, ... ), type=type, compound=compound )
 }
+#' @export
 concentration.wellList = function(x, compound=NULL, type="start", ... ) {
   
   # make sure a numeric is returned if there is only one compound in all wells
@@ -154,7 +166,9 @@ concentration.wellList = function(x, compound=NULL, type="start", ... ) {
 #' @param ... \code{ID} passed to solution; \code{solvent} described below
 #' @export
 solvent_percentages = function(x, ...) UseMethod("solvent_percentages",x)
+#' @export
 solvent_percentages.default = function(x, ...) return(NA)
+#' @export
 solvent_percentages.Solution = function(x, solvent=NULL, ...) {
   
   # if the percentage for a single solvent is requested, return a numeric
@@ -169,9 +183,11 @@ solvent_percentages.Solution = function(x, solvent=NULL, ...) {
   out = paste( x$solvent$name, format1(x$solvent$perc), sep="-", collapse=", ")
   return(out)
 }
+#' @export
 solvent_percentages.well = function(x, solvent=NULL, ID="last", ... ) {
   solvent_percentages( get_solution(x, ID=ID, ...), solvent=solvent )
 }
+#' @export
 solvent_percentages.wellList = function(x, solvent=NULL, ... ) {
   
   # make sure a numeric is returned if there is only one solvent in all wells

@@ -34,7 +34,9 @@ half.life = c( 1000, 1000, 100, 100, 10, 10,
 r = -log(2)/half.life # rate of decay
 num.cells = unlist(data[ t>50, ][1, 1:12]) # number of cells at 50 hours
 
-# Lets say that the perurbation was added at t.perturb hours
+# Lets say that the perurbation was added at index i.perturb
+i.perturb = 
+
 t.perturb = c(rep(50,6),rep(55,6))
 params = data.frame( P = num.cells, r = r )
 for( i in 1:nrow(params) ) {
@@ -54,7 +56,8 @@ comps = c(rep("A",6),rep("B",6),rep("C",4))
 concs = c(half.life, rep(1,4))
 wells = WellList(compound.names=comps, concentrations=concs, location=1:16)
 wells = add_data_data.frame(wells, data.wtime)
-plot(a2, color="compound")
+plot(wells, color="compound", diagnostic=1)
+plot(wells, color="compound") # uh ohhh -- the time is the index and the index is the time??
 
 
 

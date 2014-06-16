@@ -6,10 +6,11 @@ Author: Kevin D'Auria <kdauria@gmail.com>
 Maintainer: Kevin D'Auria <kdauria@gmail.com>
 License: Unknown
 Depends:
-    R (>= 3.1.0)
-Imports:
-    knitr,
+    R (>= 3.1.0),
     Rcpp
+LinkingTo: Rcpp
+Imports:
+    knitr
 URL: 
 VignetteBuilder: knitr
 LazyData: true

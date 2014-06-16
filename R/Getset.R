@@ -4,6 +4,7 @@
 #' 
 #' @param x a wellList
 #' @param i range to select
+#' @export
 `[.wellList` = function( x, i ) {
   r = NextMethod("[")
   mostattributes(r) = attributes(x)
@@ -16,6 +17,7 @@
 #' 
 #' @param x a wellList
 #' @param ... more wellLists
+#' @export
 c.wellList = function(x,...) {
   r = NextMethod("c")
   mostattributes(r) = attributes(x)
@@ -28,6 +30,7 @@ c.wellList = function(x,...) {
 #' 
 #' @param x an actionList
 #' @param i range to select
+#' @export
 `[.actionList` = function( x, i ) {
   r = NextMethod("[")
   mostattributes(r) = attributes(x)
@@ -40,6 +43,7 @@ c.wellList = function(x,...) {
 #' 
 #' @param x an actionList
 #' @param ... more actionLists
+#' @export
 c.actionList= function(x,...) {
   r = NextMethod("c")
   mostattributes(r) = attributes(x)
@@ -69,11 +73,12 @@ well_key.well = function(x) paste(filename(x),code(x))
 #' that gives the location or identifier of a well
 #' No two wells can have the same "code".
 #' 
-#' @importFrom Rcpp cppFunction
 #' @param x well or wellList
 #' @export
 code = function(x) UseMethod("code",x)
+#' @export
 code.well = function(x) x[["code"]]
+#' @export
 code.wellList = function(x) sapply(x, code)
 
 
@@ -94,16 +99,18 @@ code.wellList = function(x) sapply(x, code)
   x
 }
 
-#' Data filenames of wells
+#' @title Data filenames of wells
 #' 
+#' @description
 #' Returns the name of the file(s) containing
 #' the data for each well in the input
 #' 
-#' @importFrom Rcpp cppFunction
 #' @param x well or wellList
 #' @export
 filename = function(x) UseMethod("filename",x)
+#' @export
 filename.well = function(x) x[["file"]]
+#' @export
 filename.wellList = function(x) sapply(x, filename)
 
 
@@ -129,22 +136,12 @@ for( i in seq_along(x)) {
 #' in a action or actionList object
 #' 
 #' @param x action or actionList object
-#' @importFrom Rcpp cppFunction
 #' @export
 index = function(x) UseMethod("index",x)
+#' @export
 index.action = function(x) x[["i"]]
-index.actionList = function(x) index_actionList_rcpp(x)
-cppFunction('
-  NumericVector index_actionList_rcpp( List x ) {
-            List temp;
-            unsigned int n=x.size(), i;
-            NumericVector out(n);
-            for( i = 0; i<n ; i++ ) {
-              temp = as<List>(x[i]);
-              out[i] = as<double>(temp["i"]);
-            }
-            return out;
-            }')
+#' @export
+index.actionList = function(x) sapply(x, index)
 
 
 #' Index of an action

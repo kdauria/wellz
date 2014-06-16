@@ -54,7 +54,7 @@
 #' @param data.dir the root directory for the data files
 #' @param parse_fun function that parses data files and returns data matrix
 #' @param spline logical indicating to add a spline or not
-#' 
+#' @export
 parse_metadata = function( metadata, data.dir=NULL, parse_fun=NULL, spline=!is.null(parse_fun) ) {
 
   # Parse the metadata
@@ -107,6 +107,7 @@ read_metadata = function( metadata, data.dir, sep="\t" ) {
 #' If a cell is "-", then change it to \code{NA}.
 #' 
 #' @param x metadata file
+#' @importFrom zoo na.locf
 fillblanks_metadata = function(x) {
   x[x==""] = NA
   x = na.locf(x)

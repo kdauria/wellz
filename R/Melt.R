@@ -8,6 +8,7 @@
 #' @param x a \code{wellList} object
 #' @param ... passed to \code{param_matrix(x, ...)}
 #' @import data.table
+#' @export
 melt_wellList_params = function(x, ...) {
   dt = melt_wellList(x)
   p = param_matrix(x, ...)
@@ -23,6 +24,7 @@ melt_wellList_params = function(x, ...) {
 #' 
 #' @param x a \code{wellList object}
 #' @import data.table
+#' @export
 melt_wellList = function(x) {
   l = lapply(x, "[[", "data")
   dt = rbindlist(l)
@@ -61,6 +63,7 @@ melt_wellList = function(x) {
 #' @param ID passed to \code{group}
 #' @param compound passed to \code{group}
 #' @param solvent passed to \code{group}
+#' @export
 param_matrix = function( x, ..., type="start", ID="last", compound=NULL, solvent=NULL ) {
 
   check_well_params( x, ...)

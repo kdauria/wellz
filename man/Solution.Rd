@@ -53,6 +53,8 @@ the data frames must be the same length or \code{NULL}. If they are \code{NULL},
 then the corresponding column will be filled with \code{NA} values.
 If no arguments are provided for a data frame, then a data frame
 with the correct columns but zero rows will be returned.
+
+If \code{compound.type=NA}, then it is by default set to \code{"start"}
 }
 \examples{
 # empty Solution object

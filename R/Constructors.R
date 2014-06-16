@@ -40,6 +40,7 @@
 #' @param solvent.df
 #' @param solvent.names
 #' @param solvent.percs
+#' @export
 #'
 #' @examples
 #' # empty Solution object
@@ -78,7 +79,7 @@ Solution = function( volume=NA, compound.df=NULL,
     }
     soln$compounds = as.data.frame_with_nulls(compounds.list)
   } else {
-    soln$compounds = data.frame(name=character(),conc=numeric(),type=character())
+    soln$compounds = data.frame(name=character(),conc=numeric(),type=character(),stringsAsFactors=FALSE)
   }
   # Set NA compound types to "start"
   soln$compounds$type[ is.na(soln$compounds$type) ] = "start"
@@ -130,6 +131,7 @@ Solution = function( volume=NA, compound.df=NULL,
 #' @param rmVol a numeric
 #' @param solution a \code{Solution} object
 #' @param ... passed to \code{Solution}
+#' @export
 Action = function( ID=NA, i=NA, rmVol=0, 
                    solution=NULL, ... ) {
   
@@ -169,6 +171,8 @@ Action = function( ID=NA, i=NA, rmVol=0,
 #' as their ID's (numbers change with \code{as.character}). If any
 #' of the actions have NA as their ID, these actions are named
 #' similarly.
+#' 
+#' @export
 #' 
 #' @examples
 #' # Empty actionList
@@ -254,6 +258,7 @@ ActionList = function( actions=NULL,
 #' @param location
 #' @param actionList
 #' @param ...
+#' @export
 #' 
 #' @examples
 #' # A blank well object
@@ -312,6 +317,7 @@ Well = function( file=NA, location=NA,
 #' \code{compound.types}, \code{solvent.names}, and \code{solvent.percs} (solution-level parameters)
 #' arguments.
 #' 
+#' @export
 #' 
 #' @examples
 #' # An empty wellList
@@ -399,7 +405,7 @@ equal_length_list = function(x) {
 # elements to a data.frame. NULL elements are made columns
 # with all NA values
 as.data.frame_with_nulls = function(x) {
-  as.data.frame(equal_length_list(x))
+  as.data.frame(equal_length_list(x), stringsAsFactors=FALSE)
 }
 
 

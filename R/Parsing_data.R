@@ -78,7 +78,7 @@ add_data_data.frame = function( wells, df, names=FALSE) {
     }
   } else {
     for( j in seq_along(wells) ) {
-      columns = which( colnames(df) %in% c("i","t") )
+      columns = match( c("i","t"), colnames(df) )
       columns = c( columns, setdiff( 1:ncol(df), columns )[j] )
       wells[[j]]$data = df[ , columns ]
       colnames(wells[[j]]$data) = c("i","t","value")

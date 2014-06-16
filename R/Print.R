@@ -9,6 +9,7 @@
 #' @param wells a \code{wellList} object
 #' @param printall print concentration of all wells even if there are >32 wells
 #' @param ID the action and solution in each well with which to summarize the action
+#' @export
 print.wellList = function( wells, printall=FALSE, ID="last" ) {
   
   files = filename(wells)
@@ -17,7 +18,7 @@ print.wellList = function( wells, printall=FALSE, ID="last" ) {
     return()
   }
   
-  if( unique(files)==1 || length(wells)<33 || printall ) {
+  if( length(unique(files))==1 || length(wells)<33 || printall ) {
     
     # get information for every single well in a data.frame
     out = list()
@@ -54,6 +55,7 @@ print.wellList = function( wells, printall=FALSE, ID="last" ) {
 #' summary of the last action
 #' 
 #' @param well a \code{well} object
+#' @export
 print.well = function( well ) {
   
   cat("File:", well$file, "\n")
@@ -78,12 +80,18 @@ print.well = function( well ) {
 #'   a solution
 #'   
 #' @param soln a \code{Solution} object
+#' @export
 print.Solution = function( soln ) {
   cat("Volume: ", soln$volume, "\n")  
   if( length(compound_names(soln)) ) cat( compound_string(soln), "\n" )
   cat( solvent_string(soln) )
 }
 
+#' Print an actionList
+#' 
+#' Print an actionList
+#' 
+#' @export
 print.actionList = function( actionlist ) {
   
   out = list()
