@@ -42,6 +42,52 @@ add_data.wellList = function( wells, data.dir, parse_fun ) {
   wells
 }
 
+#' Add data from data frame to wells
+#' 
+#' This function assumes that the column names of the data
+#' frame are the locations of the wells. If \code{names=FALSE},
+#' then the columns are assigned to wells in order (e.g., the third
+#' column is assigned to the third well). The first column is assumed
+#' to be the time. The column name "i" is reserved for the
+#' "index" of the data points. If it is not already in the provided
+#' data frame, then it is created as 1:nrow(df).
+#' 
+#' 
+#' @param wells a \code{wellList} object
+#' @param df the data frame holding the data
+#' @param names a \code{logical}
+add_data_data.frame = function( wells, df, names=FALSE) {
+  
+  # The index of the data points
+  if( !("i" %in% n) )
+    df$i = 1:nrow(df)
+  
+  if(names) {
+    if( unique(code(wells))!=length(wells) ) {
+      stop("Every well ID must be unique")
+    }
+    codes = code(wells)
+    for( code in codes ) {
+      if( !(code %in% colnames(dat)) ) {
+        warning(paste("Well",code,"not in data frame"))
+        next
+      }
+      well.i = code == codes
+      wells[[well.i]]$data = df[ , c("i","t",codes) ]
+      colnames(wells[[well.i]]$data) = c("i","t","value")
+    }
+  } else {
+    for( j in seq_along(wells) ) {
+      columns = which( colnames(df) %in% c("i","t") )
+      columns = c( columns, setdiff( 1:ncol(df), columns )[j] )
+      wells[[j]]$data = df[ , columns ]
+      colnames(wells[[j]]$data) = c("i","t","value")
+    }
+  }
+  return(wells)
+}
+
+
 #' Parse RTCA data
 #' 
 #' A parsing function to be used by \code{add_data}. The

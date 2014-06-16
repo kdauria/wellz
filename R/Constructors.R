@@ -30,6 +30,8 @@
 #' If no arguments are provided for a data frame, then a data frame
 #' with the correct columns but zero rows will be returned.
 #' 
+#' If \code{compound.type=NA}, then it is by default set to \code{"start"}
+#' 
 #' @param volume
 #' @param compound.df
 #' @param compound.names
@@ -78,6 +80,8 @@ Solution = function( volume=NA, compound.df=NULL,
   } else {
     soln$compounds = data.frame(name=character(),conc=numeric(),type=character())
   }
+  # Set NA compound types to "start"
+  soln$compounds$type[ is.na(soln$compounds$type) ] = "start"
   
   # Make solvents data.frame
   if(!is.null(solvent.df)) {
@@ -308,6 +312,7 @@ Well = function( file=NA, location=NA,
 #' \code{compound.types}, \code{solvent.names}, and \code{solvent.percs} (solution-level parameters)
 #' arguments.
 #' 
+#' 
 #' @examples
 #' # An empty wellList
 #' WellList()
@@ -317,6 +322,11 @@ Well = function( file=NA, location=NA,
 #' 
 #' # 10-well wellList
 #' WellList(location=1:10, volume=11:20)
+# file=NULL; location=NULL; ID=NULL; rmVol=NULL; i=NULL; volume=NULL
+# compound.names=NULL; concentrations=NULL; compound.types=NULL; solvent.names=NULL; solvent.percs=NULL
+# args=list(file=file,location=location,ID=ID,rmVol=rmVol,i=i,
+#           volume=volume,compound.names=compound.names,concentrations=concentrations,
+#           compound.types=compound.types,solvent.names=solvent.names,solvent.percs=solvent.percs)
 WellList = function( wells=NULL,
                      file=NULL, location=NULL, # well-level parametrs
                      ID=NULL, rmVol=NULL, i=NULL, # action-level parameters
@@ -342,7 +352,7 @@ WellList = function( wells=NULL,
       soln = with(params.i, Solution( volume=volume, compound.names=compound.names,
                                   concentrations=concentrations, compound.types=compound.types,
                                   solvent.names=solvent.names, solvent.percs=solvent.percs ) )
-      action = with(params.i, Action(ID=ID, rmVol=rmVol, i=i))
+      action = with(params.i, Action(ID=ID, rmVol=rmVol, i=i, solution=soln))
       actionList = ActionList( actions=list(action) )
       well = with(params.i, Well(file=file, location=location, actionList=actionList))
       wells[[ii]] = well

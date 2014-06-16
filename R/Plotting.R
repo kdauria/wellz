@@ -50,7 +50,7 @@
 # Code for quickly set all of the values when debugging
 # diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
 # spline=FALSE; line=!spline; args=list(color="concentration")
-# nbw=5; min.dx=NULL
+# nbw=5; min.dx=NULL; deriv=0; smoother=FALSE
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
                           ID="last",
@@ -68,7 +68,10 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   args = arg_defaults( args )
   args$ID = ID
   
-  # Set up the aesthetics from possible groupins of wells
+  # set NA filenames to ""
+  filename(x)[ is.na(filename(x)) ] = ""
+  
+  # Set up the aesthetics from possible groupings of wells
   maes = do.call( well_aes, c(list(x),args) )
   maes$group = quote(interaction(file,location))
   
@@ -85,7 +88,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
   
   # Melt the data into ggplot format
   data = do.call( melt_wellList_params, c(list(x),args) )
-
+  
   # Base plot and the data
   base.plot = ggplot(data, maes)
   if(discrete) make_discrete( data, maes )

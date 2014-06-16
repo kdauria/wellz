@@ -26,12 +26,6 @@ exp_decay = function( t, P, r ) {
 data = data.frame( apply(params, 1, function(x) log_growth(t, x["P"], x["r"], x["K"])) )
 colnames(data) = 1:ncol(data)
 
-# Quick plot of the data
-data.wtime = cbind(t,data)
-mdata = melt( data.wtime, id.vars="t" )
-colnames(mdata) = c("t","loc","value")
-ggplot(mdata, aes(x=t, y=value, group=loc)) + geom_line()
-
 # Now add a perturbation that decreases the number of cells
 # two conditions at three concentrations (in duplicate) = 2 * 3 * 2 = 12
 # the rest of the wells continue logistic growth (don't modify these wells)
@@ -49,13 +43,18 @@ for( i in 1:nrow(params) ) {
   data[ t>t.perturb[i], i] = decay.data
 }
 
-# Quick replot of the data
+############ Quick replot of the data
 data.wtime = cbind(t,data)
 mdata = melt( data.wtime, id.vars="t" )
 colnames(mdata) = c("t","loc","value")
 ggplot(mdata, aes(x=t, y=value, group=loc)) + geom_line()
 
-# Now need to make constructors so that csv files aren't so necessary
+############ Make wellList object with the data
+comps = c(rep("A",6),rep("B",6),rep("C",4))
+concs = c(half.life, rep(1,4))
+wells = WellList(compound.names=comps, concentrations=concs, location=1:16)
+wells = add_data_data.frame(wells, data.wtime)
+plot(a2, color="compound")
 
 
 
