@@ -119,11 +119,20 @@ is_char_len1 = function(x) is.character(x) && length(x)==1
 #' This is much faster than using an \code{apply} type function.
 #' 
 #' @param x a matrix
-rowSD = function(x) {
+#' @param na.rm a \code{logical}
+rowSD = function(x, na.rm=FALSE) {
   mat = as.matrix(x)
   m = nrow(mat)
   n = ncol(mat)
-  .rowSums( (mat - .rowMeans(mat,m,n))^2, m, n )^2 / (ncol(mat)-1)
+
+  if( na.rm ) {
+    out = sqrt(.rowSums( (mat - .rowMeans(mat,m,n,na.rm=TRUE))^2, 
+                         m, n, na.rm=TRUE) / 
+                 (.rowSums( !is.na(mat), m, n ) - 1))
+  } else {
+    out = sqrt( .rowSums( (mat - .rowMeans(mat,m,n))^2, m, n ) / (ncol(mat)-1) )
+  }
+  return(out)
 }
 
 

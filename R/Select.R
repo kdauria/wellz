@@ -38,7 +38,9 @@
 #' @param code a string
 #' @param ID a string
 #' @param controls a \code{logical}
+#' @export
 search = function(x,...) UseMethod("search",x)
+#' @export
 search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",controls=FALSE) {
   
   # filename & code
@@ -67,7 +69,9 @@ search.wellList = function(x,compstr=NULL,filename=NULL,code=NULL,ID="last",cont
 #' 
 #' @param x a \code{wellList} object
 #' @param ... passed to \code{search}
+#' @export
 select = function(x, ...) UseMethod("select",x)
+#' @export
 select.wellList = function(wells, ...) {
   yn = search(wells, ...)
   wells[which(yn)]
@@ -90,6 +94,7 @@ select.wellList = function(wells, ...) {
 #' upper bound. These names and bounds are then used to search
 #' for wells that match these requirements.
 #' 
+#' @import stringr
 #' @param comp.str see \code{search} for description of the string format
 parse_comp_str = function( comp.string ) {
   # get string between each boolean operator

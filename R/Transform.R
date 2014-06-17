@@ -11,8 +11,14 @@
 #' where the are three duplicate pairs, then the output
 #' will contain three wells.
 #' 
+#' The standard deviation is saved as column \code{sd} in the data
+#' matrix of the resulting wells. \code{NA} values are removed
+#' before the means and standard deviations are calculated.
+#' 
+#' @import plyr
 #' @param x a \code{wellList} object
 #' @param ID which action to refer to
+#' @export
 average_replicates = function(x, ID="last") {
   # group the wells by their solutions to find repilcates
   welldescrip = interaction( concentration(x, type="all", ID=ID),
@@ -46,8 +52,8 @@ average_replicates = function(x, ID="last") {
     value.list[2:length(groups[[i]])] = lapply( x[other.wells], interp )
     
     value.table = as.data.table(value.list)
-    new.x[[i]]$data$value = rowMeans(value.table)
-    new.x[[i]]$data$sd = rowSD(value.table)
+    new.x[[i]]$data$value = rowMeans(value.table, na.rm=TRUE)
+    new.x[[i]]$data$sd = rowSD(value.table, na.rm=TRUE)
     
     new.x[[i]]$code = paste( code(x[groups[[i]]]), collapse="+")
   }

@@ -3,10 +3,12 @@
 \alias{rowSD}
 \title{standard deviation of rows}
 \usage{
-rowSD(x)
+rowSD(x, na.rm = FALSE)
 }
 \arguments{
 \item{x}{a matrix}
+
+\item{na.rm}{a \code{logical}}
 }
 \description{
 This is much faster than using an \code{apply} type function.

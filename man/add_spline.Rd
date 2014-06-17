@@ -13,5 +13,6 @@ add_spline(x, ...)
 \description{
 Calls \code{stats::splinefun} with \code{method="monoH.FC"} and
 adds the resulting function to the \code{well} object.
+Does not allow extrapolation; NA values will be returned.
 }
 

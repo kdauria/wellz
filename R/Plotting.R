@@ -46,6 +46,7 @@
 #'           points when adding interpolating points in between data points.
 #' @param smoother \code{logical} if to show smoother
 #' @param deriv \code{numeric} which order derivative to plot
+#' @export
 
 # Code for quickly set all of the values when debugging
 # diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
@@ -116,6 +117,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
 #' 
 #' @param x a \code{well} object
 #' @param ... passed to \code{plot.wellList}
+#' @export
 plot.well = function(x, ...) {
   plot( structure( list(x), class=c("wellList","list") ), ...)
 }

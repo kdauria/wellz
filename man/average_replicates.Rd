@@ -22,4 +22,9 @@ object is returned. For instance, if there are 6 wells
 where the are three duplicate pairs, then the output
 will contain three wells.
 }
+\details{
+The standard deviation is saved as column \code{sd} in the data
+matrix of the resulting wells. \code{NA} values are removed
+before the means and standard deviations are calculated.
+}
 

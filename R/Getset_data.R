@@ -6,6 +6,7 @@
 #' @param x well object
 #' @export
 wdata = function(x, ...) UseMethod("wdata",x)
+#' @export
 wdata.well = function(x) x$data
 
 
@@ -15,7 +16,9 @@ wdata.well = function(x) x$data
 #' three columns: i, t, and value indicating the indices, times, and values
 #' 
 #' @param x well object
+#' @export
 "wdata<-" = function(x, ...) UseMethod("wdata<-",x)
+#' @export
 "wdata<-.well" = function(x, value) { x$data = value ; x }
 
 
@@ -26,6 +29,7 @@ wdata.well = function(x) x$data
 #' @param x well object
 #' @export
 tdata = function(x, ...) UseMethod("tdata", x)
+#' @export
 tdata.well = function(x) wdata(x)$t
 
 
@@ -37,6 +41,7 @@ tdata.well = function(x) wdata(x)$t
 #' @param x well object
 #' @export
 "tdata<-" = function(x, ...) UseMethod("tdata<-",x)
+#' @export
 "tdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "t", value); x}
 
 
@@ -48,6 +53,7 @@ tdata.well = function(x) wdata(x)$t
 #' @param x well object
 #' @export
 vdata = function(x, ...) UseMethod("vdata", x)
+#' @export
 vdata.well = function(x) wdata(x)$value
 
 
@@ -58,6 +64,7 @@ vdata.well = function(x) wdata(x)$value
 #' @param x well object
 #' @export
 "vdata<-" = function(x, ...) UseMethod("vdata<-",x)
+#' @export
 "vdata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "value", value); x}
 
 
@@ -68,6 +75,7 @@ vdata.well = function(x) wdata(x)$value
 #' @param x well object
 #' @export
 idata = function(x, ...) UseMethod("idata", x)
+#' @export
 idata.well = function(x) wdata(x)$i
 
 
@@ -78,6 +86,7 @@ idata.well = function(x) wdata(x)$i
 #' @param x well object
 #' @export
 "idata<-" = function(x, ...) UseMethod("idata<-",x)
+#' @export
 "idata<-.well" = function(x, value) { wdata(x) = `$<-`( wdata(x), "i", value); x}
 
 

@@ -2,14 +2,34 @@
 #' 
 #' Calls \code{stats::splinefun} with \code{method="monoH.FC"} and
 #' adds the resulting function to the \code{well} object.
+#' Does not allow extrapolation; NA values will be returned.
 #' 
 #' @param x a \code{well} object
 #' @param ... ignored
+#' @export
 add_spline = function(x,...) UseMethod("add_spline",x)
+#' @export
 add_spline.well = function(x, ...) {
-  x$spline = splinefun( x=x$data$t, y=x$data$value, method="monoH.FC" )
+  sfun = splinefun( x=tdata(x), y=vdata(x), method="monoH.FC" )
+  bounds = range( tdata(x)[!is.na(vdata(x))] )
+  
+  # The function saved to x$spline
+  # Note the sfun, bounds, and x will be saved in this
+  # function's environment. (Lots of data in x)
+  # so maybe later find a way to avoid saving x twice
+  x$spline = function(xx) {
+    
+    # Set extrapolated values to NA
+    xx[ xx < bounds[1] | xx > bounds[2] ] = NA
+    
+    # Only do interpolation on non-NA values since
+    # some functions from splinefun fail when given NA values
+    xx[!is.na(xx)] = sfun(na.omit(xx))
+    xx
+  }
   x
 }
+#' @export
 add_spline.wellList = function(x, ...) {
   for( i in seq_along(x))
     x[[i]] = add_spline(x[[i]],...)

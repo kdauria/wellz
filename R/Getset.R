@@ -65,7 +65,7 @@ roster = function(wells) {
 #' Combines the filename and code of a well to give a unique key
 #' 
 #' @param x a well object
-well_key.well = function(x) paste(filename(x),code(x))
+well_key = function(x) paste(filename(x),code(x))
 
 #' Get the unique identifier(s) of one or more wells
 #' 
@@ -190,9 +190,13 @@ ID.wellList = function(x) lapply(x,ID)
 #' 
 #' @param x a well object
 #' @param ... passed to solution
+#' @export
 volume = function(x,...) UseMethod("volume",x)
+#' @export
 volume.Solution = function(x) x$volume
+#' @export
 volume.well = function(x, ...) get_solution(x, ...)$volume
+#' @export
 volume.wellList = function(x, ...) sapply(x, volume, ...)
 
 
