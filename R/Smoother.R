@@ -4,11 +4,14 @@
 #' the well object
 #' 
 #' @param x a \code{well} or \code{wellList} object
+#' @export
 add_smoother = function(x, ...) UseMethod("add_smoother", x)
+#' @export
 add_smoother.well = function(x, ...) {
   x$smoother = smoother(x, ...)
   x
 }
+#' @export
 add_smoother.wellList = function(x, ...) {
   x = lapply(x, add_smoother, ...)
   class(x) = c("wellList","list")
@@ -29,7 +32,9 @@ add_smoother.wellList = function(x, ...) {
 #'     \code{fsmoother_smooth.spline}, \code{fsmoother_lokerns}, 
 #'     \code{fsmoother_curfit}, and \code{fsmoother_composite}, respectively.
 #' @param ... passed to one of the fsmoother functions
+#' @export
 smoother = function(x, ...) UseMethod("smoother", x)
+#' @export
 smoother.well = function(x, method="smooth.spline", ...) {
   f = switch(method,
              smooth.spline=fsmoother_smooth.spline(tdata(x),vdata(x),...),

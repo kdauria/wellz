@@ -98,7 +98,9 @@ idata.well = function(x) wdata(x)$i
 #' @param x well object
 #' @param i the index, an integer
 i_t = function(x, ...) UseMethod("i_t", x)
+#' @export
 i_t.default = function(x, ...) return(NA)
+#' @export
 i_t.well = function(x, i) wdata(x)$t[ match(i, wdata(x)$i) ]
 
 
@@ -110,7 +112,9 @@ i_t.well = function(x, i) wdata(x)$t[ match(i, wdata(x)$i) ]
 #' @param x well object
 #' @param i the index, an integer
 i_v = function(x, ...) UseMethod("i_v", x)
+#' @export
 i_v.default = function(x, ...) return(NA)
+#' @export
 i_v.well = function(x, i) wdata(x)$value[ match(i, wdata(x)$i) ]
 
 
@@ -126,10 +130,15 @@ i_v.well = function(x, i) wdata(x)$value[ match(i, wdata(x)$i) ]
 #' @param x action, actionList, well, or wellList
 #' @param ... arguments passed to action or actionList
 ID_i = function(x,...) UseMethod("ID_i", x)
+#' @export 
 ID_i.default = function(x, ...) return(NA)
+#' @export
 ID_i.action = function(x, ...) get_action(x, ...)$i
+#' @export
 ID_i.actionList = function(x, ...) sapply( get_actionList(x, ...), ID_i )
+#' @export
 ID_i.well = function(x, ...) sapply( get_actionList(x, ...), ID_i )
+#' @export
 ID_i.wellList = function( x, ... ) sapply(x, ID_i, ... )
 
 
@@ -145,8 +154,11 @@ ID_i.wellList = function( x, ... ) sapply(x, ID_i, ... )
 #' @param x action, actionList, well, or wellList
 #' @param ... arguments passed to ID_i
 ID_t = function(x,...) UseMethod("ID_t", x)
+#' @export
 ID_t.default = function(x, ...) return(NA)
+#' @export
 ID_t.well = function(x, ...) i_t(x, ID_i(x, ...))
+#' @export
 ID_t.wellList = function( x, ... ) sapply(x, ID_t, ... )
 
 
@@ -162,6 +174,9 @@ ID_t.wellList = function( x, ... ) sapply(x, ID_t, ... )
 #' @param x action, actionList, well, or wellList
 #' @param ... arguments passed to ID_i
 ID_v = function(x,...) UseMethod("ID_v", x)
+#' @export
 ID_v.default = function(x, ...) return(NA)
+#' @export
 ID_v.well = function(x, ...) i_v(x, ID_i(x, ...))
+#' @export
 ID_v.wellList = function( x, ... ) sapply(x, ID_v, ... )

@@ -74,11 +74,13 @@ average_replicates = function(x, ID="last") {
 #' 
 #' @param x a \code{well} object
 #' @param methods a character vector or list of functions
+#' @export
 transform.well = function(x, methods, ...) {
   if(length(methods)==1) return( do.call( methods, list(x,...) ) )
   for( m in methods ) x = do.call( m, list(x,...) )
   return(x)
 }
+#' @export
 transform.wellList = transform.well
 
 #' Time-center the data
@@ -89,19 +91,26 @@ transform.wellList = transform.well
 #' 
 #' @param x a \code{well} or \code{wellList} object
 #' @param ... the \code{ID} can be set
+#' @export
 tcenter = function(x,...) UseMethod("tcenter",x)
+#' @export
 tcenter.well = function(x, ID="last", ...) {
+  if(!(ID %in% c("last",ID(x)))) {
+    warning(paste("ID", ID,"not in well. Returning NULL"))
+    return(NULL)
+  }
   centered.time = ID_t(x, ID=ID, ...)
   tdata(x) = tdata(x) - centered.time
   x = add_spline(x)
   x
 }
+#' @export
 tcenter.wellList = function(x, ...) {
   x = lapply(x, tcenter, ...)
+  x = x[ !sapply(x,is.null) ]
   class(x) = c("wellList","list")
   x
 }
-
 
 #' Normalize well data
 #' 
@@ -110,15 +119,23 @@ tcenter.wellList = function(x, ...) {
 #' 
 #' @param x a \code{well} or \code{wellList} object
 #' @param ... the \code{ID} can be set
+#' @export
 normalize = function(x, ...) UseMethod("normalize", x)
+#' @export
 normalize.well = function(x, ID="last", ...) {
+  if( !(ID %in% ID(x)) ) {
+    warning("ID",ID,"not in well. Returning NULL")
+    return(NULL)
+  }
   norm.val = ID_v(x, ID=ID)
   vdata(x) = vdata(x)/norm.val
   x = add_spline(x)
   x
 }
+#' @export
 normalize.wellList = function(x, ...) {
   x = lapply(x, normalize, ...)
+  x = x[ !sapply(x,is.null) ]
   class(x) = c("wellList","list")
   x
 }
@@ -131,14 +148,18 @@ normalize.wellList = function(x, ...) {
 #' 
 #' @param x a \code{well} or \code{wellList} object
 #' @param ... ignored
+#' @export
 slice = function(x, ...) UseMethod("slice", x)
+#' @export
 slice.well = function(x, xlim, ...) {
   wdata(x) = wdata(x)[ tdata(x) > xlim[1] & tdata(x) < xlim[2], ]
   x = add_spline(x)
   x
 }
+#' @export
 slice.wellList = function(x, ...) {
   x = lapply(x, slice, ...)
+  x = x[ !sapply(x,is.null) ]
   class(x) = c("wellList","list")
   x
 }
@@ -152,15 +173,23 @@ slice.wellList = function(x, ...) {
 #' 
 #' @param x a \code{well} or \code{wellList} object
 #' @param ... the \code{ID} can be set
+#' @export
 level = function(x, ...) UseMethod("level", x)
+#' @export
 level.well = function(x, ID="last", ...) {
+  if( !(ID %in% ID(x)) ) {
+    warning("ID",ID,"not in well. Returning NULL")
+    return(NULL)
+  }
   norm.val = ID_v(x, ID=ID)
   vdata(x) = vdata(x) - norm.val
   x = add_spline(x)
   x
 }
+#' @export
 level.wellList = function(x, ...) {
   x = lapply(x, level, ...)
+  x = x[ !sapply(x,is.null) ]
   class(x) = c("wellList","list")
   x
 }

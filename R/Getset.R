@@ -91,7 +91,9 @@ code.wellList = function(x) sapply(x, code)
 #' @param x well or wellList
 #' @param value a character vector
 "code<-" = function(x,value) UseMethod("code<-",x)
+#' @export
 "code<-.well" = function(x,value) x[["code"]] = value
+#' @export
 "code<-.wellList" = function(x,value) {
   for( i in seq_along(x)) {
     x[[i]]$code = value[i]
@@ -122,7 +124,9 @@ filename.wellList = function(x) sapply(x, filename)
 #' @param x well or wellList
 #' @param value a character vector
 "filename<-" = function(x,value) UseMethod("filename<-",x)
+#' @export
 "filename<-.well" = function(x,value) x[["file"]] = value
+#' @export
 "filename<-.wellList" = function(x,value) {
 for( i in seq_along(x)) {
     x[[i]]$file = value[i]
@@ -151,7 +155,9 @@ index.actionList = function(x) sapply(x, index)
 #' 
 #' @param x action or actionList object
 "index<-" = function(x,value) UseMethod("i<-",x)
+#' @export
 "index<-.action" = function(x,value) x[["i"]] = value
+#' @export
 "index<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["i"]] = value[i]; x }
 
 
@@ -162,9 +168,13 @@ index.actionList = function(x) sapply(x, index)
 #' @param x action, actionList, well, or wellList object
 #' @export
 ID = function(x) UseMethod("ID",x)
+#' @export
 ID.action = function(x) x[["ID"]]
+#' @export
 ID.actionList = function(x) sapply(x, function(y) y$ID)
+#' @export
 ID.well = function(x) sapply(x$actions, ID)
+#' @export
 ID.wellList = function(x) lapply(x,ID)
 
 
@@ -174,7 +184,9 @@ ID.wellList = function(x) lapply(x,ID)
 #' 
 #' @param x action, actionList, well, or wellList object
 "ID<-" = function(x,value) UseMethod("ID<-",x)
+#' @export
 "ID<-.action" = function(x,value) x[["ID"]] = value
+#' @export
 "ID<-.actionList" = function(x,value) { 
   for(i in seq_along(x)) x[[i]][["ID"]] = value[i]
   names(x) = value
@@ -211,13 +223,18 @@ volume.wellList = function(x, ...) sapply(x, volume, ...)
 #' @param x action, actionList, well, or wellList
 #' @param ... ID argument optional, eventually passed to action
 get_solution = function(x,...) UseMethod("get_solution",x)
+#' @export
 get_solution.default = function(x, ...) return(NA)
+#' @export
 get_solution.action = function(x) x$solution
+#' @export
 get_solution.actionList = function(x,ID=NA) {
   if( is.na(ID) ) return( lapply(x, get_solution) )
   return( get_solution(get_action(x, ID)) )
 }
+#' @export
 get_solution.well = function(x, ...) get_solution( get_actionList(x), ...)
+#' @export
 get_solution.wellList = function(x, ID="last") lapply(x, get_solution, ID)
 
 
@@ -229,8 +246,11 @@ get_solution.wellList = function(x, ID="last") lapply(x, get_solution, ID)
 #' @param x action, actionList, or well object
 #' @param value solution objects
 "solution<-" = function(x,value) UseMethod("solution<-",x)
+#' @export
 "solution<-.action" = function(x,value) x[["solution"]] = value
+#' @export
 "solution<-.actionList" = function(x,value) { for(i in seq_along(x)) x[[i]][["solution"]] = value[[i]]; x }
+#' @export
 "solution<-.well" = function(x,value) { for(i in seq_along(x$actions)) x$actions[[i]][["solution"]] = value[[i]]; x }
 
 
@@ -244,17 +264,21 @@ get_solution.wellList = function(x, ID="last") lapply(x, get_solution, ID)
 #' @param x action, actionList, well, or wellList
 #' @param ... ID argument optional
 get_action = function(x, ...) UseMethod("get_action", x)
+#' @export
 get_action.action = function(x, ID=NA, ...) {
   if(is.na(ID) || ID==x$ID ) return(x)
   return(NA)
 }
+#' @export
 get_action.actionList = function(x, ID="last", ...) {
   if( ID=="last" ) return( x[[length(x)]] )
   if( length(ID)!=1 ) stop("ID argument must be of length 1")
   if( !(ID %in% ID(x)) ) return(NA)
   return( x[[ID]] )
 }
+#' @export
 get_action.well = function(x, ...) get_action( get_actionList(x), ... )
+#' @export
 get_action.wellList = function(x, ... ) lapply( x, get_action, ... )
 
 #' Get actionsLists from well(s)
@@ -267,6 +291,7 @@ get_action.wellList = function(x, ... ) lapply( x, get_action, ... )
 #' @param x actionList, well, or wellList
 #' @param ... ID argument optional
 get_actionList = function(x, ...) UseMethod("get_actionList",x)
+#' @export
 get_actionList.actionList = function(x, ID=NULL, ...) {
   if(is.null(ID)) return(x)
   if(ID=="last") return(x[length(x)])
@@ -274,7 +299,9 @@ get_actionList.actionList = function(x, ID=NULL, ...) {
   if(length(matched.ids)==0) return(NA)
   x[matched.ids]
 }
+#' @export
 get_actionList.well = function(x, ...) get_actionList(x$actions, ...)
+#' @export
 get_actionList.wellList = function(x, ...) lapply(x,get_actionList, ...)
 
 
@@ -287,5 +314,6 @@ get_actionList.wellList = function(x, ...) lapply(x,get_actionList, ...)
 #' @param x actionList, well, or wellList
 #' @param ... ID argument optional
 "actionList<-" = function(x,value) UseMethod("actionList<-",x)
+#' @export
 "actionList<-.wellList" = function(x,value) { for(i in seq_along(x)) x[[i]][["actions"]] = value[[i]]; x }
 
