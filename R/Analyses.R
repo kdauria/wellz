@@ -1,28 +1,70 @@
-# Find the maximum rate
-# ... is passed to is_in_space
-# max_rate(x,"concentration", ID="toxinAdd")
+#' Find maximum rate of curve
+#' 
+#' This finds the maximum derivative within boundaries
+#' that can be defined
+#' 
+#' \code{xlim} and \code{ylim} define a bounding box
+#' in which the highest derivative will be found.
+#' \code{pgon} is a data frame where each row
+#' represents the (x,y) coordinates of a polygon's contiguous
+#' vertices. The derivative must be found from the data
+#' within this polygon. If \code{direction="any"}, the largest
+#' rate is returned regardless if it is positive or negative.
+#' The larges positive and negative rates can be returned instead
+#' by changin the \code{direction} argument.
+#' 
+#' @param well a \code{wellList} object
+#' @param xlim a 2-element \code{numeric}
+#' @param ylim a 2-element \code{numeric}
+#' @param pgon a 2-column \code{data.frame}
+#' @param direction either \code{"any"}, \code{"positive"}, or \code{"negative"}
+#' @export
 max_rate = function( x, ...) UseMethod("max_rate",x)
-max_rate.well = function( well, xlim=NULL, ylim=NULL, pgon=NULL ) {
+#' @export
+max_rate.well = function( well, xlim=NULL, ylim=NULL, pgon=NULL, direction="any" ) {
   well.deriv = insert_n_between_spline(well, type="smoother", deriv=1, n=5)
   well = insert_n_between_spline(well, n=5)
   yn = is_in_space(well, xlim=xlim, ylim=ylim, pgon=pgon)
   
-  row.num = which.max( abs(vdata(well.deriv)[yn]) )
+  row.num = switch(direction,
+         any=which.max( abs(vdata(well.deriv)[yn]) ),
+         positive=which.max( vdata(well.deriv)[yn] ),
+         negative=which.min( vdata(well.deriv)[yn] ))
   max.row = wdata(well)[yn,][row.num,]
   max.row$rate = vdata(well.deriv)[yn][row.num]
   max.row$file = filename(well.deriv)
   max.row$location = code(well.deriv)
-  max.row = max.row[,c( -1:0+ncol(max.row), 1:(ncol(max.row)-2)) ]
+  max.row = max.row[,c( -1:0+ncol(max.row), 1:(ncol(max.row)-2)) ] # move columns around
   max.row
 }
-max_rate.wellList = function( x, groups=NULL,  xlim=NULL, ylim=NULL, pgon=NULL, ...) {
-  rates = rbindlist( lapply(x, max_rate, xlim=xlim, ylim=ylim, pgon=pgon ) )
+#' @export
+# I need to work out this groups and rbindlist thing. It's a little confusing
+# right now. A period is appended to each argument name here because
+# the argument will be eventually called by another function.
+# For another example of this error, see http://stackoverflow.com/questions/4357101/
+# Since R automatically matches arguments, this should have no
+# practical effect
+max_rate.wellList = function( x, groups=NULL,  xlim.=NULL, 
+                              ylim.=NULL, pgon.=NULL, direction.="any",  ...) {
+  
+  rates = vector(length=length(x), mode="list")
+  rates = lapply(x,max_rate, xlim=xlim., ylim=ylim., pgon=pgon., direction=direction.)
+  rates = rbindlist( rates )
   for( g in groups ) rates[[g]] = group(x, g, ...)
   rates
 }
 
-# Find the area under the curve
+#' Find area under curve
+#' 
+#' Finds the area under a curve given upper and lower bounds of the x-axis.
+#' 
+#' @import pracma
+#' @param x a \code{well} or \code{wellList} object
+#' @param lower a \code{numeric} vector
+#' @param upper a \code{numeric} vector
+#' @export
 area_under_curve = function(x, ...) UseMethod("area_under_curve", x)
+#' @export
 area_under_curve.well = function(x, lower, upper ) {
   fun = x$spline
   area = tryCatch( integrate(fun,lower,upper,subdivisions=5000)$value,
@@ -34,6 +76,7 @@ area_under_curve.well = function(x, lower, upper ) {
                    } )
   data.frame( file=filename(x), location=code(x), lower=lower, upper=upper, area=area)
 }
+#' @export
 area_under_curve.wellList = function(x, lower, upper, groups=NULL, ...) {
   areas = rbindlist( lapply( x, area_under_curve, lower=lower, upper=upper))
   for( g in groups ) areas[[g]] = group(x, g, ...)
@@ -83,7 +126,7 @@ is_in_polygon.well = function(well, ...) {
 
 # Add a polygon to a ggplot
 # this function is necessary because I don't want
-# this layer to take any aesthetics from the parent plot
+# this layer to inherit aesthetics from the parent plot
 # Note all the NA values
 # plot(well) + gg_polygon(pgon)
 gg_polygon = function( pgon, color="black", alpha=0.2 ) {

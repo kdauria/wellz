@@ -17,14 +17,14 @@ add_spline.well = function(x, ...) {
   # Note the sfun, bounds, and x will be saved in this
   # function's environment. (Lots of data in x)
   # so maybe later find a way to avoid saving x twice
-  x$spline = function(xx) {
+  x$spline = function(xx, deriv=0) {
     
     # Set extrapolated values to NA
     xx[ xx < bounds[1] | xx > bounds[2] ] = NA
     
     # Only do interpolation on non-NA values since
     # some functions from splinefun fail when given NA values
-    xx[!is.na(xx)] = sfun(na.omit(xx))
+    xx[!is.na(xx)] = sfun(na.omit(xx), deriv=deriv)
     xx
   }
   x
@@ -46,6 +46,7 @@ add_spline.wellList = function(x, ...) {
 #' @param deriv which order derivative to return
 #' @param a string, either \code{"spline"} or \code{"smoother"}
 insert_n_between_spline = function(x,...) UseMethod("insert_n_between_spline",x)
+#' @export
 insert_n_between_spline.well = function( x, ..., deriv=0, type="spline" ) {
   new.i = insert_na_between( tdata(x), ... )
   new.t = na_interp( new.i )
@@ -54,6 +55,7 @@ insert_n_between_spline.well = function( x, ..., deriv=0, type="spline" ) {
   wdata(x) = data.frame( i = new.i, t = new.t, value = new.value )
   x
 }
+#' @export
 insert_n_between_spline.wellList = function(x, ...) {
   x = lapply( x, insert_n_between_spline, ... )
   class(x) = c("wellList","list")
