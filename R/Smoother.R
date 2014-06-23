@@ -28,9 +28,11 @@ add_smoother.wellList = function(x, ...) {
 #' 
 #' @param x a \code{well} object
 #' @param method smoother type, either \code{"smooth.spline"}
-#'     \code{"lokerns"}, \code{"curfit"}, \code{"composite"}. These call
+#'     \code{"lokerns"}, \code{"curfit"}, \code{"composite"}, 
+#'     or \code{"composite2"}. These call
 #'     \code{fsmoother_smooth.spline}, \code{fsmoother_lokerns}, 
-#'     \code{fsmoother_curfit}, and \code{fsmoother_composite}, respectively.
+#'     \code{fsmoother_curfit}, \code{fsmoother_composite},
+#'     and \code{fsmoother_composite2} respectively.
 #' @param ... passed to one of the fsmoother functions
 #' @export
 smoother = function(x, ...) UseMethod("smoother", x)
@@ -40,7 +42,8 @@ smoother.well = function(x, method="smooth.spline", ...) {
              smooth.spline=fsmoother_smooth.spline(tdata(x),vdata(x),...),
              lokerns=fsmoother_lokerns(tdata(x),vdata(x),...),
              curfit=fsmoother_curfit(tdata(x),vdata(x),...),
-             composite=fsmoother_composite(tdata(x),vdata(x),...))
+             composite=fsmoother_composite(tdata(x),vdata(x),...),
+             composite2=fsmoother_composite2(tdata(x),vdata(x),...))
   return(f)
 }
 
@@ -153,6 +156,80 @@ fsmoother_composite = function(x, y, sp=1, min.dy=0, window.width=NULL) {
   message( "Upper limit of smoothing parameter s=", format(upper.limit, digits=3) )
   fsmoother_curfit( x, y, s=upper.limit*sp)
 }
+
+
+#' Variable bandwidth smoother
+#' 
+#' Smoother that changes the density of knots depending
+#' on the magnitude of change over bins of a specified width
+#' 
+#' The objective of this smoother is to make a smoother
+#' that fits the data loosely when the change in the
+#' curve is small but fit the data closely when there
+#' are big changes and sharp spikes. The approach here
+#' is to first bin the data and determine how many
+#' knots will be placed in each bin. The width of the bins
+#' are set in \code{w}. The maximum number of knots for
+#' each bin is \code{max.knots}. The number of actual knots
+#' in each bin equals the range of the y-values
+#' in the bin divided by \code{global.change} times
+#' \code{max.knots}.
+#' 
+#' @import DierckxSpline
+#' @param x a \code{numeric} vector
+#' @param y a \code{numeric} vector
+#' @param max.knots a \code{numeric}
+#' @param global.change a \code{numeric}
+fsmoother_composite2 = function(x, y, ...) {
+  object = composite2(x,y,...)
+  function(x, deriv=0) deriv(object,x,order=deriv)
+}
+
+# The core of the fsmoother_composite2 function
+# Returns a curfit object
+composite2 = function(x, y, w, max.knots, global.change) {
+  
+  # Prepare bins
+  n.bins = ceiling(diff(range(x))/w)
+  bins = as.numeric(cut(x,n.bins))
+  bin.knot.locations = vector(length=n.bins, mode="list")
+  
+  for( bin in unique(bins) ) {
+    
+    # subset the data for the bin
+    x.bin = x[bins==bin]
+    y.bin = y[bins==bin]
+    
+    # Calculate the number of knots depending on local change
+    local.change = diff(range(y.bin))
+    relative.change = local.change/global.change
+    n.knots = round(relative.change*max.knots)
+    
+    if(n.knots<=1) {
+      bin.knot.locations[[bin]] = median(x.bin)
+    } else {
+      
+      fit.local = curfit.free.knot(x.bin, y.bin, g=n.knots )
+      local.knots = knots(fit.local)
+      
+      #       fit.local = smooth.spline(x.bin, y.bin, nknots=n.knots)$fit
+      #       local.knots = unique( fit.local$knot*fit.local$range + fit.local$min )
+      
+      local.knots = c(min(x.bin),local.knots,max(x.bin))
+      bin.knot.locations[[bin]] = unique(local.knots)
+    }
+  }
+  
+  #all.knots = c(min(x),unlist(bin.knot.locations),max(x))
+  all.knots = unique(c(min(x),unlist(bin.knot.locations),max(x)))
+  fit = curfit(x,y,knots=all.knots)
+  fit
+}
+
+
+
+
+
 
 
 ############################################################

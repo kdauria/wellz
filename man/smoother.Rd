@@ -9,9 +9,11 @@ smoother(x, ...)
 \item{x}{a \code{well} object}
 
 \item{method}{smoother type, either \code{"smooth.spline"}
-\code{"lokerns"}, \code{"curfit"}, \code{"composite"}. These call
+\code{"lokerns"}, \code{"curfit"}, \code{"composite"},
+or \code{"composite2"}. These call
 \code{fsmoother_smooth.spline}, \code{fsmoother_lokerns},
-\code{fsmoother_curfit}, and \code{fsmoother_composite}, respectively.}
+\code{fsmoother_curfit}, \code{fsmoother_composite},
+and \code{fsmoother_composite2} respectively.}
 
 \item{...}{passed to one of the fsmoother functions}
 }
