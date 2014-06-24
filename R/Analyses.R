@@ -110,6 +110,11 @@ is_in_space.well = function( well, ...) {
   is_in_space(points, ...)
 }
 
+#' Check if points inside a polygon
+#' 
+#' Uses the "sp" package in R to work with shapes.
+#' 
+#' @import sp
 # pgon is a two-column matrix of a polygon's vertices
 # points is a two-column matrix of 2D points
 is_in_polygon = function(x,...) UseMethod( "is_in_polygon", x)

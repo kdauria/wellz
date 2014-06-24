@@ -6,7 +6,7 @@
 \method{plot}{wellList}(x, ..., diagnostic = NULL, xlim = NULL,
   points = FALSE, discrete = TRUE, replicates = FALSE, sd = replicates,
   ID = "last", spline = FALSE, line = NULL, nbw = 5, min.dx = NULL,
-  smoother = FALSE, deriv = 0)
+  smoother = FALSE, deriv = 0, compress = TRUE)
 }
 \arguments{
 \item{x}{a \code{wellList} object}
@@ -46,6 +46,8 @@ points when adding interpolating points in between data points.}
 \item{smoother}{\code{logical} if to show smoother}
 
 \item{deriv}{\code{numeric} which order derivative to plot}
+
+\item{compress}{\code{logical}, wheter to run \code{compress_data} or not}
 }
 \description{
 A plotting function for \code{wellList} objects.

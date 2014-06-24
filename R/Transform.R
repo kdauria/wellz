@@ -16,6 +16,7 @@
 #' before the means and standard deviations are calculated.
 #' 
 #' @import plyr
+#' @import data.table
 #' @param x a \code{wellList} object
 #' @param ID which action to refer to
 #' @export
@@ -28,7 +29,7 @@ average_replicates = function(x, ID="last") {
   
   # Find the reference well for each group and make a new wellList
   num.rows = sapply(x, function(y) nrow(y$data)) # the statistic to choose with
-  stats = data.frame( ids=1:length(x), stat=num.rows, group=group.ids ) 
+  stats = data.frame( ids=1:length(x), stat=num.rows, group=group.ids )
   refwells = c(daply(stats,"group",function(x) x$ids[which.max(x$stat)]))
   new.x = x[refwells]
   

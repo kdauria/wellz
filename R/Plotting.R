@@ -46,23 +46,25 @@
 #'           points when adding interpolating points in between data points.
 #' @param smoother \code{logical} if to show smoother
 #' @param deriv \code{numeric} which order derivative to plot
+#' @param compress \code{logical}, wheter to run \code{compress_data} or not
 #' @export
 
 # Code for quickly set all of the values when debugging
 # diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
 # spline=FALSE; line=!spline; args=list(color="concentration")
-# nbw=5; min.dx=NULL; deriv=0; smoother=FALSE
+# nbw=5; min.dx=NULL; deriv=0; smoother=FALSE; compress=TRUE
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
                           ID="last",
                           spline=FALSE, line=NULL, nbw=5, min.dx=NULL,
-                          smoother=FALSE, deriv=0) {
+                          smoother=FALSE, deriv=0, compress=TRUE) {
   
   if( deriv>0 ) smoother = TRUE
   if( is.null(line) & (spline | smoother)) line = FALSE
   if( is.null(line) ) line = TRUE
   if(!is.null(xlim)) x = slice(x, xlim=xlim)
-  if(replicates) x = average_replicates(x)
+  if(compress) x = compress_data(x)
+  if(replicates) x = average_replicates(x, ID=ID)
   
   args = list(...)
   args = highlight_well( x, args, diagnostic )
