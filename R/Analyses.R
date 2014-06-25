@@ -38,12 +38,6 @@ max_rate.well = function( well, xlim=NULL, ylim=NULL, pgon=NULL, direction="any"
   max.row
 }
 #' @export
-# I need to work out this groups and rbindlist thing. It's a little confusing
-# right now. A period is appended to each argument name here because
-# the argument will be eventually called by another function.
-# For another example of this error, see http://stackoverflow.com/questions/4357101/
-# Since R automatically matches arguments, this should have no
-# practical effect
 max_rate.wellList = function( x, groups=NULL,  xlim.=NULL, 
                               ylim.=NULL, pgon.=NULL, direction.="any",  ...) {
   
@@ -53,6 +47,12 @@ max_rate.wellList = function( x, groups=NULL,  xlim.=NULL,
   for( g in groups ) rates[[g]] = group(x, g, ...)
   rates
 }
+# I need to work out this groups and rbindlist thing. It's a little confusing
+# right now. A period is appended to each argument name here because
+# the argument will be eventually called by another function.
+# For another example of this error, see http://stackoverflow.com/questions/4357101/
+# Since R automatically matches arguments, this should have no
+# practical effect
 
 #' Find area under curve
 #' 
