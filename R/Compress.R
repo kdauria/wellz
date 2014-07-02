@@ -17,8 +17,8 @@ compress_data = function(x,...) UseMethod("compress_data",x)
 compress_data.well = function(well) {
   
   image.dim.px = dev.size(units="px")
-  data.dim = c( x=diff(range(tdata(well))),
-                y=diff(range(vdata(well))))
+  data.dim = c( x=diff(range(tdata(well), na.rm=TRUE)),
+                y=diff(range(vdata(well), na.rm=TRUE)))
   pix.size = data.dim / image.dim.px
   
   x = tdata(well)
