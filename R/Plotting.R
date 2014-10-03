@@ -48,17 +48,16 @@
 #' @param deriv \code{numeric} which order derivative to plot
 #' @param compress \code{logical}, wheter to run \code{compress_data} or not
 #' @export
-
-# Code for quickly set all of the values when debugging
-# diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
-# spline=FALSE; line=!spline; args=list(color="concentration")
-# nbw=5; min.dx=NULL; deriv=0; smoother=FALSE; compress=TRUE
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
                           ID="last",
                           spline=FALSE, line=NULL, nbw=5, min.dx=NULL,
                           smoother=FALSE, deriv=0, compress=TRUE) {
   
+  # Code for quickly set all of the values when debugging
+  # diagnostic=NULL; xlim=NULL; points=FALSE; discrete=TRUE; replicates=FALSE; sd=replicates
+  # spline=FALSE; line=!spline; args=list(color="concentration")
+  # nbw=5; min.dx=NULL; deriv=0; smoother=FALSE; compress=TRUE
   if( deriv>0 ) smoother = TRUE
   if( is.null(line) & (spline | smoother)) line = FALSE
   if( is.null(line) ) line = TRUE
