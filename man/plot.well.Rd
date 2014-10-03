@@ -3,7 +3,7 @@
 \alias{plot.well}
 \title{Plot one well object}
 \usage{
-plot.well(x, ...)
+\method{plot}{well}(x, ...)
 }
 \arguments{
 \item{x}{a \code{well} object}

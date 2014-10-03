@@ -47,6 +47,7 @@
 #' @param smoother \code{logical} if to show smoother
 #' @param deriv \code{numeric} which order derivative to plot
 #' @param compress \code{logical}, wheter to run \code{compress_data} or not
+#' @method plot wellList
 #' @export
 plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL, 
                           points=FALSE, discrete=TRUE, replicates=FALSE, sd=replicates,
@@ -118,6 +119,7 @@ plot.wellList = function( x, ..., diagnostic=NULL, xlim=NULL,
 #' 
 #' @param x a \code{well} object
 #' @param ... passed to \code{plot.wellList}
+#' @method plot well
 #' @export
 plot.well = function(x, ...) {
   plot( structure( list(x), class=c("wellList","list") ), ...)

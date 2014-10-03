@@ -3,9 +3,9 @@
 \alias{plot.wellList}
 \title{Plotting well objects}
 \usage{
-plot.wellList(x, ..., diagnostic = NULL, xlim = NULL, points = FALSE,
-  discrete = TRUE, replicates = FALSE, sd = replicates, ID = "last",
-  spline = FALSE, line = NULL, nbw = 5, min.dx = NULL,
+\method{plot}{wellList}(x, ..., diagnostic = NULL, xlim = NULL,
+  points = FALSE, discrete = TRUE, replicates = FALSE, sd = replicates,
+  ID = "last", spline = FALSE, line = NULL, nbw = 5, min.dx = NULL,
   smoother = FALSE, deriv = 0, compress = TRUE)
 }
 \arguments{
